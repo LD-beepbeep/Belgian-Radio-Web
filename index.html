@@ -14,8 +14,6 @@
   <style>
     :root {
       --bg: #121212;
-      --card-bg: #1e1e1e;
-      --card-hover: #2a2a2a;
       --text: #ffffff;
       --text-muted: #a0a0a0;
       --accent: #10b981;
@@ -30,7 +28,7 @@
       flex-direction: column;
       align-items: center;
       padding: 2rem;
-      padding-bottom: 100px; /* Space for the bottom player */
+      padding-bottom: 110px; 
       user-select: none;
     }
 
@@ -50,44 +48,49 @@
       max-width: 800px;
     }
 
-    /* Station Cards */
+    /* Colored Station Cards */
     .card {
-      background-color: var(--card-bg);
       border-radius: 12px;
       padding: 1.2rem 1rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       cursor: pointer;
-      transition: all 0.2s ease;
-      border: 2px solid transparent;
+      transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+      /* Subtle border so black cards don't disappear on black background */
+      border: 1px solid rgba(255, 255, 255, 0.1); 
     }
 
     .card:hover {
-      background-color: var(--card-hover);
       transform: translateY(-2px);
+      filter: brightness(0.9);
     }
 
     .card.playing {
-      border-color: var(--accent);
-      background-color: rgba(16, 185, 129, 0.05);
+      /* Dynamic glowing ring when active */
+      box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--text-muted);
+      transform: scale(1.02);
     }
 
     .card img {
-      width: 52px; /* SCALED SMALLER */
+      width: 52px;
       height: 52px;
       object-fit: contain;
       margin-bottom: 1rem;
       border-radius: 8px;
     }
 
-    .card .name { font-size: 0.85rem; font-weight: 600; text-align: center; }
+    .card .name { 
+      font-size: 0.85rem; 
+      font-weight: 600; 
+      text-align: center; 
+    }
 
     /* Player Bar */
     .player-bar {
       position: fixed;
       bottom: 0; left: 0; width: 100%;
-      background-color: rgba(24, 24, 24, 0.85);
+      background-color: rgba(24, 24, 24, 0.9);
       backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
       padding: 1rem 2rem;
@@ -98,17 +101,18 @@
       box-sizing: border-box;
       transform: translateY(100%);
       transition: transform 0.3s ease;
+      z-index: 100;
     }
     
     .player-bar.active { transform: translateY(0); }
 
-    .now-playing { display: flex; align-items: center; gap: 1rem; width: 33%; }
+    .now-playing { display: flex; align-items: center; gap: 1rem; width: 30%; }
     .now-playing img { width: 44px; height: 44px; border-radius: 8px; }
     .now-playing .title { font-weight: bold; font-size: 0.95rem; margin-bottom: 4px; }
     .now-playing .status { font-size: 0.75rem; color: var(--text-muted); }
 
     /* Controls */
-    .controls { display: flex; align-items: center; justify-content: center; width: 33%; }
+    .controls { display: flex; align-items: center; justify-content: center; width: 40%; gap: 1.5rem; }
     
     .play-btn {
       background: var(--text);
@@ -126,7 +130,55 @@
     }
     .play-btn:active { transform: scale(0.95); }
 
-    /* Buffering Spinner inside button */
+    /* Right Tools (Timer & Volume) */
+    .tools { 
+      display: flex; 
+      align-items: center; 
+      justify-content: flex-end; 
+      width: 30%; 
+      gap: 1.5rem; 
+      color: var(--text-muted);
+    }
+
+    .timer-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: color 0.2s;
+    }
+    .timer-container:hover { color: var(--text); }
+    .timer-container.active { color: var(--accent); }
+    .timer-text { font-size: 0.8rem; font-variant-numeric: tabular-nums; font-weight: bold; }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 80px;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 12px; width: 12px;
+      border-radius: 50%;
+      background: var(--text);
+      cursor: pointer;
+      margin-top: -4px;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 4px;
+      cursor: pointer;
+      background: #444;
+      border-radius: 2px;
+    }
+
+    /* Spinner */
     .fa-spinner { display: none; }
     .is-buffering .fa-spinner { display: block; animation: spin 1s linear infinite; }
     .is-buffering .fa-play, .is-buffering .fa-pause { display: none !important; }
@@ -156,32 +208,58 @@
       </button>
     </div>
     
-    <div style="width: 33%;"></div> </div>
+    <div class="tools">
+      <div class="timer-container" id="timer-btn" onclick="cycleTimer()">
+        <i class="fa-solid fa-moon"></i>
+        <span class="timer-text" id="timer-text"></span>
+      </div>
+      <div class="volume-container">
+        <i class="fa-solid fa-volume-low"></i>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" oninput="updateVolume(this.value)">
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Register Service Worker for PWA (Installability)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed: ', err));
       });
     }
 
+    // 1. Your exact data with background colors (logos set to root directory)
     const stations = [
-      {id:"stubru",name:"Studio Brussel",streamUrl:"https://icecast.vrtcdn.be/stubru-high.mp3",logo:"stubru.jpg"},
-      {id:"boenkerz",name:"Boenkerz",streamUrl:"https://altair.streamerr.co:8096/boenkerz",logo:"boenkerz.jpg"},
-      {id:"tijdloze",name:"De Tijdloze",streamUrl:"https://icecast.vrtcdn.be/stubru_tijdloze-high.mp3",logo:"detijdloze.png"},
-      {id:"mnm",name:"MNM",streamUrl:"https://icecast.vrtcdn.be/mnm-high.mp3",logo:"mnm.png"},
-      {id:"topradio",name:"TOPradio",streamUrl:"https://27783.live.streamtheworld.com/TOP_RADIO.mp3",logo:"top.png"},
-      {id:"radio1",name:"Radio 1",streamUrl:"https://icecast.vrtcdn.be/radio1-high.mp3",logo:"radio1.png"},
-      {id:"qmusic",name:"Qmusic",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/qmusic.mp3",logo:"qmusic.png"},
-      {id:"joe",name:"JOE",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/joe_fm/mp3",logo:"joe.png"},
-      {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",logo:"willy.png"}
+      {id:"stubru",name:"Studio Brussel",streamUrl:"https://icecast.vrtcdn.be/stubru-high.mp3",website:"https://stubru.be",logo:"stubru.jpg",bgColor:"#ffffff"},
+      {id:"boenkerz",name:"Boenkerz",streamUrl:"https://altair.streamerr.co:8096/boenkerz",website:"https://boenkerz.be",logo:"boenkerz.jpg",bgColor:"#ffffff"},
+      {id:"tijdloze",name:"De Tijdloze",streamUrl:"https://icecast.vrtcdn.be/stubru_tijdloze-high.mp3",website:"https://stubru.be/tijdloze",logo:"detijdloze.png",bgColor:"#ffe682"},
+      {id:"mnm",name:"MNM",streamUrl:"https://icecast.vrtcdn.be/mnm-high.mp3",website:"https://mnm.be",logo:"mnm.png",bgColor:"#feff56"},
+      {id:"topradio",name:"TOPradio",streamUrl:"https://27783.live.streamtheworld.com/TOP_RADIO.mp3",website:"https://topradio.be",logo:"top.png",bgColor:"#ffffff"},
+      {id:"radio1",name:"Radio 1",streamUrl:"https://icecast.vrtcdn.be/radio1-high.mp3",website:"https://radio1.be",logo:"radio1.png",bgColor:"#ffffff"},
+      {id:"qmusic",name:"Qmusic",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/qmusic.mp3",website:"https://qmusic.be",logo:"qmusic.png",bgColor:"#ffffff"},
+      {id:"joe",name:"JOE",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/joe_fm/mp3",website:"https://joe.be",logo:"joe.png",bgColor:"#1a52b3"},
+      {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",website:"https://willy.radio",logo:"willy.png",bgColor:"#000000"}
     ];
 
     const audio = new Audio();
     let activeStation = null;
 
-    // Audio Event Listeners
+    // Timer logic
+    const timerCycles = [0, 15, 30, 60]; // minutes
+    let currentTimerCycleIndex = 0;
+    let sleepTimeRemaining = 0;
+    let timerInterval = null;
+
+    // Helper: Determine if text should be black or white based on background
+    function getContrastColor(hexColor) {
+      if (!hexColor) return '#ffffff';
+      let hex = hexColor.replace('#', '');
+      let r = parseInt(hex.substr(0, 2), 16);
+      let g = parseInt(hex.substr(2, 2), 16);
+      let b = parseInt(hex.substr(4, 2), 16);
+      let yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return (yiq >= 128) ? '#000000' : '#ffffff';
+    }
+
     audio.addEventListener('waiting', () => updatePlayerUI('buffering'));
     audio.addEventListener('playing', () => updatePlayerUI('playing'));
     audio.addEventListener('pause', () => updatePlayerUI('paused'));
@@ -192,8 +270,20 @@
 
       stations.forEach(station => {
         const isPlaying = activeStation && activeStation.id === station.id;
+        const textColor = getContrastColor(station.bgColor);
+        
         const card = document.createElement('div');
         card.className = `card ${isPlaying ? 'playing' : ''}`;
+        // Apply background and dynamic text color
+        card.style.backgroundColor = station.bgColor || '#1e1e1e';
+        card.style.color = textColor;
+        
+        // If it's currently playing, we color the active ring with its background color (or gray if it's black)
+        if (isPlaying) {
+            const glowColor = station.bgColor === '#000000' ? '#555555' : station.bgColor;
+            card.style.boxShadow = `0 0 0 3px var(--bg), 0 0 0 6px ${glowColor}`;
+        }
+
         card.onclick = () => selectStation(station);
 
         card.innerHTML = `
@@ -212,7 +302,6 @@
         audio.src = station.streamUrl;
         audio.play();
         
-        // Show Player Bar
         document.getElementById('player-bar').classList.add('active');
         document.getElementById('pb-title').innerText = station.name;
         document.getElementById('pb-logo').src = station.logo;
@@ -224,6 +313,48 @@
       if (!activeStation) return;
       if (audio.paused) audio.play();
       else audio.pause();
+    }
+
+    function updateVolume(val) {
+      audio.volume = val;
+    }
+
+    // Sleep Timer Logic
+    function cycleTimer() {
+      currentTimerCycleIndex = (currentTimerCycleIndex + 1) % timerCycles.length;
+      const minutes = timerCycles[currentTimerCycleIndex];
+      
+      clearInterval(timerInterval);
+      const timerBtn = document.getElementById('timer-btn');
+      const timerText = document.getElementById('timer-text');
+
+      if (minutes === 0) {
+        timerBtn.classList.remove('active');
+        timerText.innerText = '';
+      } else {
+        timerBtn.classList.add('active');
+        sleepTimeRemaining = minutes * 60;
+        updateTimerDisplay();
+        
+        timerInterval = setInterval(() => {
+          sleepTimeRemaining--;
+          updateTimerDisplay();
+          
+          if (sleepTimeRemaining <= 0) {
+            clearInterval(timerInterval);
+            audio.pause();
+            currentTimerCycleIndex = 0;
+            timerBtn.classList.remove('active');
+            timerText.innerText = '';
+          }
+        }, 1000);
+      }
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(sleepTimeRemaining / 60);
+      const s = sleepTimeRemaining % 60;
+      document.getElementById('timer-text').innerText = `${m}:${s.toString().padStart(2, '0')}`;
     }
 
     function updatePlayerUI(state) {
@@ -241,12 +372,10 @@
       } else if (state === 'playing') {
         document.getElementById('pause-icon').style.display = 'block';
         status.innerText = "Live";
-        // DYNAMIC TITLE 
         document.title = `▶ ${activeStation.name} - Frequency`;
       } else if (state === 'paused') {
         document.getElementById('play-icon').style.display = 'block';
         status.innerText = "Paused";
-        // RESET TITLE
         document.title = "Frequency";
       }
       render();
