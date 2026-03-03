@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Belgian Radio</title>
+  <title>Radio WEB</title>
   <style>
-    /* --- CSS STYLES --- */
     :root {
-      --bg-color: #121212;
+      --bg: #121212;
       --card-bg: #1e1e1e;
       --card-hover: #2a2a2a;
-      --text-main: #ffffff;
+      --text: #ffffff;
       --text-muted: #a0a0a0;
-      --accent: #10b981; /* Green accent for playing state */
+      --accent: #10b981;
     }
 
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 2rem;
+      padding-bottom: 100px; /* Space for player bar */
     }
 
     h1 {
@@ -36,13 +36,14 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       gap: 1.5rem;
       width: 100%;
       max-width: 800px;
     }
 
-    .station-card {
+    /* Station Cards */
+    .card {
       background-color: var(--card-bg);
       border-radius: 16px;
       padding: 1.5rem 1rem;
@@ -52,125 +53,278 @@
       cursor: pointer;
       transition: all 0.2s ease;
       border: 2px solid transparent;
+      position: relative;
     }
 
-    .station-card:hover {
-      background-color: var(--card-hover);
-      transform: translateY(-2px);
-    }
-
-    .station-card.playing {
-      border-color: var(--accent);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
-    }
-
-    .station-logo {
-      width: 64px;
-      height: 64px;
+    .card:hover { background-color: var(--card-hover); transform: translateY(-2px); }
+    
+    .card img {
+      width: 64px; height: 64px;
       object-fit: contain;
       margin-bottom: 1rem;
       border-radius: 8px;
     }
 
-    .station-name {
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-align: center;
-    }
+    .card .name { font-size: 0.9rem; font-weight: 600; text-align: center; }
 
-    /* Bottom Player Bar */
-    .player-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: var(--card-bg);
-      padding: 1rem;
-      display: flex;
+    /* Add Custom Station Button */
+    .add-btn {
+      border: 2px dashed #444;
+      background: transparent;
       justify-content: center;
-      align-items: center;
+      color: #888;
+    }
+    .add-btn:hover { border-color: var(--text); color: var(--text); }
+    .add-btn .plus { font-size: 2.5rem; font-weight: 300; margin-bottom: 0.5rem; line-height: 1;}
+
+    /* Player Bar */
+    .player-bar {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background-color: #181818;
+      padding: 1rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
       border-top: 1px solid #333;
+      box-sizing: border-box;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    .player-bar.active { transform: translateY(0); }
+
+    .now-playing { display: flex; align-items: center; gap: 1rem; }
+    .now-playing img { width: 40px; height: 40px; border-radius: 6px; }
+    .now-playing .title { font-weight: bold; }
+    .now-playing .status { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Controls */
+    .controls { display: flex; align-items: center; gap: 1rem; }
+    .play-pause-btn {
+      background: var(--text); color: var(--bg);
+      border: none; border-radius: 50%;
+      width: 48px; height: 48px;
+      font-size: 1.2rem; cursor: pointer;
+      display: flex; justify-content: center; align-items: center;
     }
 
-    .status-text {
-      font-size: 0.9rem;
-      color: var(--accent);
-      font-weight: bold;
+    /* Buffering Spinner */
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top: 3px solid var(--text);
+      border-radius: 50%; width: 20px; height: 20px;
+      animation: spin 1s linear infinite;
+      display: none;
     }
+    .is-buffering .spinner { display: block; }
+    .is-buffering .play-icon, .is-buffering .pause-icon { display: none !important; }
+
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Modal for Custom Stations */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none; justify-content: center; align-items: center;
+      z-index: 100;
+    }
+    .modal {
+      background: var(--card-bg); padding: 2rem; border-radius: 12px;
+      width: 100%; max-width: 400px;
+    }
+    .modal input {
+      width: 100%; padding: 0.8rem; margin-bottom: 1rem;
+      background: #121212; border: 1px solid #333; color: white;
+      border-radius: 6px; box-sizing: border-box;
+    }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; }
+    .btn { padding: 0.6rem 1.2rem; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-cancel { background: transparent; color: white; }
+    .btn-save { background: var(--accent); color: white; }
   </style>
 </head>
 <body>
 
   <h1>Belgian Radio</h1>
-  
-  <div class="grid" id="station-grid"></div>
+  <div class="grid" id="grid"></div>
 
-  <div class="player-bar" id="player-bar" style="display: none;">
-    <span class="status-text" id="status-text">Now Playing: ...</span>
+  <div class="player-bar" id="player-bar">
+    <div class="now-playing">
+      <img id="pb-logo" src="" alt="logo">
+      <div>
+        <div class="title" id="pb-title">Station Name</div>
+        <div class="status" id="pb-status">Ready to play</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="play-pause-btn" id="play-pause-btn" onclick="togglePlayPause()">
+        <span class="play-icon" id="play-icon">▶</span>
+        <span class="pause-icon" id="pause-icon" style="display: none;">⏸</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h2>Add Station</h2>
+      <input type="text" id="new-name" placeholder="Station Name (e.g. My Radio)">
+      <input type="text" id="new-stream" placeholder="Stream URL (https://...)">
+      <input type="text" id="new-logo" placeholder="Logo filename or URL (optional)">
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-save" onclick="saveCustomStation()">Save</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    /* --- JAVASCRIPT LOGIC --- */
-    
-    // 1. Define your stations here!
-    // Replace the stream URLs with the actual radio stream links
-    const stations = [
-      { id: 'qmusic', name: 'Q-Music', logo: 'q-music.png', stream: 'https://icecast-qmusicbe-cdp.flb.ssl.tech.dpgmedia.be/qmusic_be_live.mp3' },
-      { id: 'topradio', name: 'TOPradio', logo: 'top.png', stream: 'https://topradio-be.cdn.dmdsd.com/topradio.mp3' },
-      { id: 'studiobrussel', name: 'Studio Brussel', logo: 'stubru.png', stream: 'https://icecast.vrtcdn.be/stubru-high.mp3' },
-      // Add as many as you want...
+    // 1. Setup default stations (paths fixed to root)
+    const defaultStations = [
+      {id:"stubru",name:"Studio Brussel",streamUrl:"https://icecast.vrtcdn.be/stubru-high.mp3",logo:"stubru.jpg",bgColor:"#ffffff"},
+      {id:"boenkerz",name:"Boenkerz",streamUrl:"https://altair.streamerr.co:8096/boenkerz",logo:"boenkerz.jpg",bgColor:"#ffffff"},
+      {id:"tijdloze",name:"De Tijdloze",streamUrl:"https://icecast.vrtcdn.be/stubru_tijdloze-high.mp3",logo:"detijdloze.png",bgColor:"#ffe682"},
+      {id:"mnm",name:"MNM",streamUrl:"https://icecast.vrtcdn.be/mnm-high.mp3",logo:"mnm.png",bgColor:"#feff56"},
+      {id:"topradio",name:"TOPradio",streamUrl:"https://27783.live.streamtheworld.com/TOP_RADIO.mp3",logo:"top.png",bgColor:"#ffffff"},
+      {id:"radio1",name:"Radio 1",streamUrl:"https://icecast.vrtcdn.be/radio1-high.mp3",logo:"radio1.png",bgColor:"#ffffff"},
+      {id:"qmusic",name:"Qmusic",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/qmusic.mp3",logo:"qmusic.png",bgColor:"#ffffff"},
+      {id:"joe",name:"JOE",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/joe_fm/mp3",logo:"joe.png",bgColor:"#1a52b3"},
+      {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",logo:"willy.png",bgColor:"#000000"}
     ];
 
+    // 2. Load custom stations from storage
+    let customStations = JSON.parse(localStorage.getItem('customStations') || '[]');
+    let allStations = [...defaultStations, ...customStations];
+
+    // 3. Audio & State
     const audio = new Audio();
-    let currentStationId = null;
+    let activeStation = null;
+    let isPlaying = false;
 
-    const grid = document.getElementById('station-grid');
-    const playerBar = document.getElementById('player-bar');
-    const statusText = document.getElementById('status-text');
+    // Audio Event Listeners for accurate Buffering/Play/Pause states
+    audio.addEventListener('waiting', () => updatePlayerUI('buffering'));
+    audio.addEventListener('playing', () => updatePlayerUI('playing'));
+    audio.addEventListener('pause', () => updatePlayerUI('paused'));
+    audio.addEventListener('error', () => {
+        alert("Error loading stream. It might be offline.");
+        updatePlayerUI('paused');
+    });
 
-    // 2. Render the stations to the screen
-    function renderStations() {
-      grid.innerHTML = ''; // Clear grid
+    // 4. Render Grid
+    function render() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
 
-      stations.forEach(station => {
+      allStations.forEach(station => {
+        const isCurrent = activeStation && activeStation.id === station.id;
         const card = document.createElement('div');
-        card.className = `station-card ${currentStationId === station.id ? 'playing' : ''}`;
-        card.onclick = () => togglePlay(station);
-
-        card.innerHTML = `
-          <img src="${station.logo}" alt="${station.name}" class="station-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'64\\' height=\\'64\\'><rect width=\\'64\\' height=\\'64\\' fill=\\'%23333\\'/></svg>'">
-          <div class="station-name">${station.name}</div>
-        `;
         
+        card.className = 'card';
+        // Add dynamic glow based on the station's bgColor if playing
+        if (isCurrent && isPlaying) {
+          card.style.borderColor = station.bgColor || '#10b981';
+          card.style.boxShadow = `0 4px 15px ${station.bgColor || '#10b981'}40`;
+        }
+
+        card.onclick = () => selectStation(station);
+        card.innerHTML = `
+          <img src="${station.logo || 'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'64\\' height=\\'64\\'><rect width=\\'64\\' height=\\'64\\' fill=\\'%23333\\'/></svg>'}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'64\\' height=\\'64\\'><rect width=\\'64\\' height=\\'64\\' fill=\\'%23333\\'/></svg>'">
+          <div class="name">${station.name}</div>
+        `;
         grid.appendChild(card);
       });
+
+      // Add "Custom Add" button at the end
+      const addBtn = document.createElement('div');
+      addBtn.className = 'card add-btn';
+      addBtn.onclick = () => document.getElementById('modal').style.display = 'flex';
+      addBtn.innerHTML = `<div class="plus">+</div><div class="name">Add Stream</div>`;
+      grid.appendChild(addBtn);
     }
 
-    // 3. Handle Play/Pause logic
-    function togglePlay(station) {
-      // If clicking the currently playing station, pause it
-      if (currentStationId === station.id) {
-        audio.pause();
-        currentStationId = null;
-        playerBar.style.display = 'none';
+    // 5. Playback Logic
+    function selectStation(station) {
+      if (activeStation && activeStation.id === station.id) {
+        // Toggle play/pause if clicking the same station
+        togglePlayPause();
       } else {
-        // Play new station
-        currentStationId = station.id;
-        audio.src = station.stream;
+        // Switch to new station
+        activeStation = station;
+        audio.src = station.streamUrl;
         audio.play();
-        
-        // Update UI
-        playerBar.style.display = 'flex';
-        statusText.innerText = `🔊 Now Playing: ${station.name}`;
+        document.getElementById('player-bar').classList.add('active');
+        document.getElementById('pb-title').innerText = station.name;
+        document.getElementById('pb-logo').src = station.logo;
       }
-      
-      // Re-render to update the green highlight ring
-      renderStations();
+      render();
     }
 
-    // Initialize the app
-    renderStations();
+    function togglePlayPause() {
+      if (!activeStation) return;
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+    }
 
+    function updatePlayerUI(state) {
+      const btn = document.getElementById('play-pause-btn');
+      const status = document.getElementById('pb-status');
+      
+      btn.className = 'play-pause-btn'; // reset class
+      document.getElementById('play-icon').style.display = 'none';
+      document.getElementById('pause-icon').style.display = 'none';
+
+      if (state === 'buffering') {
+        btn.classList.add('is-buffering');
+        status.innerText = "Buffering...";
+        isPlaying = false;
+      } else if (state === 'playing') {
+        document.getElementById('pause-icon').style.display = 'block';
+        status.innerText = "Live";
+        isPlaying = true;
+      } else if (state === 'paused') {
+        document.getElementById('play-icon').style.display = 'block';
+        status.innerText = "Paused";
+        isPlaying = false;
+      }
+      render(); // Update borders
+    }
+
+    // 6. Custom Station Logic
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+      document.getElementById('new-name').value = '';
+      document.getElementById('new-stream').value = '';
+      document.getElementById('new-logo').value = '';
+    }
+
+    function saveCustomStation() {
+      const name = document.getElementById('new-name').value;
+      const streamUrl = document.getElementById('new-stream').value;
+      const logo = document.getElementById('new-logo').value;
+
+      if (!name || !streamUrl) {
+        alert("Name and Stream URL are required!");
+        return;
+      }
+
+      const newStation = {
+        id: 'custom-' + Date.now(),
+        name,
+        streamUrl,
+        logo: logo || '',
+        bgColor: '#10b981' // default green glow for custom stations
+      };
+
+      customStations.push(newStation);
+      localStorage.setItem('customStations', JSON.stringify(customStations));
+      
+      allStations = [...defaultStations, ...customStations];
+      render();
+      closeModal();
+    }
+
+    // Initialize
+    render();
   </script>
 </body>
 </html>
