@@ -17,6 +17,10 @@
       --text: #ffffff;
       --text-muted: #a0a0a0;
       --accent: #10b981;
+      
+      /* Dynamic Player Bar Variables */
+      --pb-bg: rgba(24, 24, 24, 0.9);
+      --pb-text: #ffffff;
     }
 
     body {
@@ -25,156 +29,156 @@
       background-color: var(--bg);
       color: var(--text);
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-      padding-bottom: 110px; 
+      justify-content: center;
+      padding: 3rem 2rem 120px 2rem; 
       user-select: none;
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 2rem;
-      color: var(--text-muted);
-      letter-spacing: 2px;
-      text-transform: uppercase;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 1.2rem;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 1.5rem;
       width: 100%;
-      max-width: 800px;
+      max-width: 850px;
+      align-content: start;
+    }
+
+    /* Premium Entrance Animation */
+    @keyframes fadeUpBounce {
+      0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+      60% { opacity: 1; transform: translateY(-5px) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     /* Colored Station Cards */
     .card {
-      border-radius: 12px;
-      padding: 1.2rem 1rem;
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       cursor: pointer;
-      transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
-      /* Subtle border so black cards don't disappear on black background */
-      border: 1px solid rgba(255, 255, 255, 0.1); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+      /* Spring-like transition */
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      opacity: 0; /* Starts hidden for animation */
+      animation: fadeUpBounce 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 
     .card:hover {
-      transform: translateY(-2px);
-      filter: brightness(0.9);
+      transform: translateY(-6px) scale(1.03);
+      filter: brightness(1.1);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
     }
 
     .card.playing {
-      /* Dynamic glowing ring when active */
-      box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--text-muted);
-      transform: scale(1.02);
+      transform: scale(1.05);
+      z-index: 2;
     }
 
     .card img {
-      width: 52px;
-      height: 52px;
+      width: 64px;
+      height: 64px;
       object-fit: contain;
       margin-bottom: 1rem;
-      border-radius: 8px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
     .card .name { 
-      font-size: 0.85rem; 
+      font-size: 0.9rem; 
       font-weight: 600; 
       text-align: center; 
+      letter-spacing: 0.5px;
     }
 
-    /* Player Bar */
+    /* Dynamic Player Bar */
     .player-bar {
       position: fixed;
       bottom: 0; left: 0; width: 100%;
-      background-color: rgba(24, 24, 24, 0.9);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
-      padding: 1rem 2rem;
+      background-color: var(--pb-bg);
+      color: var(--pb-text);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      padding: 1.2rem 2.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid #333;
+      border-top: 1px solid rgba(255,255,255,0.1);
       box-sizing: border-box;
       transform: translateY(100%);
-      transition: transform 0.3s ease;
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s ease, color 0.4s ease;
       z-index: 100;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
     }
     
     .player-bar.active { transform: translateY(0); }
 
     .now-playing { display: flex; align-items: center; gap: 1rem; width: 30%; }
-    .now-playing img { width: 44px; height: 44px; border-radius: 8px; }
-    .now-playing .title { font-weight: bold; font-size: 0.95rem; margin-bottom: 4px; }
-    .now-playing .status { font-size: 0.75rem; color: var(--text-muted); }
+    .now-playing img { width: 50px; height: 50px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .now-playing .title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; letter-spacing: 0.5px;}
+    .now-playing .status { font-size: 0.75rem; opacity: 0.8; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;}
 
     /* Controls */
     .controls { display: flex; align-items: center; justify-content: center; width: 40%; gap: 1.5rem; }
     
     .play-btn {
-      background: var(--text);
-      color: var(--bg);
+      background: var(--pb-text);
+      color: var(--pb-bg);
       border: none;
       border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      font-size: 1.2rem;
+      width: 56px;
+      height: 56px;
+      font-size: 1.4rem;
       cursor: pointer;
       display: flex;
       justify-content: center;
       align-items: center;
-      transition: transform 0.1s;
+      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s ease, color 0.4s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
+    .play-btn:hover { transform: scale(1.08); }
     .play-btn:active { transform: scale(0.95); }
 
-    /* Right Tools (Timer & Volume) */
+    /* Tools */
     .tools { 
       display: flex; 
       align-items: center; 
       justify-content: flex-end; 
       width: 30%; 
       gap: 1.5rem; 
-      color: var(--text-muted);
+      color: var(--pb-text);
+      opacity: 0.9;
     }
 
-    .timer-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      font-size: 1.1rem;
-      transition: color 0.2s;
-    }
-    .timer-container:hover { color: var(--text); }
-    .timer-container.active { color: var(--accent); }
-    .timer-text { font-size: 0.8rem; font-variant-numeric: tabular-nums; font-weight: bold; }
+    .timer-container, .volume-icon { cursor: pointer; transition: opacity 0.2s; }
+    .timer-container:hover, .volume-icon:hover { opacity: 0.7; }
+    
+    .timer-container { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; }
+    .timer-text { font-size: 0.85rem; font-variant-numeric: tabular-nums; font-weight: bold; }
 
-    .volume-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
+    .volume-container { display: flex; align-items: center; gap: 0.8rem; }
+    
     input[type=range] {
       -webkit-appearance: none;
-      width: 80px;
+      width: 90px;
       background: transparent;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      height: 12px; width: 12px;
+      height: 14px; width: 14px;
       border-radius: 50%;
-      background: var(--text);
+      background: var(--pb-text);
       cursor: pointer;
-      margin-top: -4px;
+      margin-top: -5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
     input[type=range]::-webkit-slider-runnable-track {
       width: 100%; height: 4px;
       cursor: pointer;
-      background: #444;
+      background: rgba(255,255,255,0.3);
       border-radius: 2px;
     }
 
@@ -188,7 +192,6 @@
 </head>
 <body>
 
-  <h1>Frequency</h1>
   <div class="grid" id="grid"></div>
 
   <div class="player-bar" id="player-bar">
@@ -214,7 +217,7 @@
         <span class="timer-text" id="timer-text"></span>
       </div>
       <div class="volume-container">
-        <i class="fa-solid fa-volume-low"></i>
+        <i class="fa-solid fa-volume-low volume-icon" id="vol-icon" onclick="toggleMute()"></i>
         <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" oninput="updateVolume(this.value)">
       </div>
     </div>
@@ -227,29 +230,29 @@
       });
     }
 
-    // 1. Your exact data with background colors (logos set to root directory)
     const stations = [
-      {id:"stubru",name:"Studio Brussel",streamUrl:"https://icecast.vrtcdn.be/stubru-high.mp3",website:"https://stubru.be",logo:"stubru.jpg",bgColor:"#ffffff"},
-      {id:"boenkerz",name:"Boenkerz",streamUrl:"https://altair.streamerr.co:8096/boenkerz",website:"https://boenkerz.be",logo:"boenkerz.jpg",bgColor:"#ffffff"},
-      {id:"tijdloze",name:"De Tijdloze",streamUrl:"https://icecast.vrtcdn.be/stubru_tijdloze-high.mp3",website:"https://stubru.be/tijdloze",logo:"detijdloze.png",bgColor:"#ffe682"},
-      {id:"mnm",name:"MNM",streamUrl:"https://icecast.vrtcdn.be/mnm-high.mp3",website:"https://mnm.be",logo:"mnm.png",bgColor:"#feff56"},
-      {id:"topradio",name:"TOPradio",streamUrl:"https://27783.live.streamtheworld.com/TOP_RADIO.mp3",website:"https://topradio.be",logo:"top.png",bgColor:"#ffffff"},
-      {id:"radio1",name:"Radio 1",streamUrl:"https://icecast.vrtcdn.be/radio1-high.mp3",website:"https://radio1.be",logo:"radio1.png",bgColor:"#ffffff"},
-      {id:"qmusic",name:"Qmusic",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/qmusic.mp3",website:"https://qmusic.be",logo:"qmusic.png",bgColor:"#ffffff"},
-      {id:"joe",name:"JOE",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/joe_fm/mp3",website:"https://joe.be",logo:"joe.png",bgColor:"#1a52b3"},
-      {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",website:"https://willy.radio",logo:"willy.png",bgColor:"#000000"}
+      {id:"stubru",name:"Studio Brussel",streamUrl:"https://icecast.vrtcdn.be/stubru-high.mp3",logo:"stubru.jpg",bgColor:"#ffffff"},
+      {id:"boenkerz",name:"Boenkerz",streamUrl:"https://altair.streamerr.co:8096/boenkerz",logo:"boenkerz.jpg",bgColor:"#ffffff"},
+      {id:"tijdloze",name:"De Tijdloze",streamUrl:"https://icecast.vrtcdn.be/stubru_tijdloze-high.mp3",logo:"detijdloze.png",bgColor:"#ffe682"},
+      {id:"mnm",name:"MNM",streamUrl:"https://icecast.vrtcdn.be/mnm-high.mp3",logo:"mnm.png",bgColor:"#feff56"},
+      {id:"topradio",name:"TOPradio",streamUrl:"https://27783.live.streamtheworld.com/TOP_RADIO.mp3",logo:"top.png",bgColor:"#ffffff"},
+      {id:"radio1",name:"Radio 1",streamUrl:"https://icecast.vrtcdn.be/radio1-high.mp3",logo:"radio1.png",bgColor:"#ffffff"},
+      {id:"npo1",name:"NPO Radio 1",streamUrl:"https://icecast.omroep.nl/radio1-bb-aac",logo:"npo1.png",bgColor:"#2058FF"},
+      {id:"qmusic",name:"Qmusic",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/qmusic.mp3",logo:"qmusic.png",bgColor:"#ffffff"},
+      {id:"joe",name:"JOE",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/joe_fm/mp3",logo:"joe.png",bgColor:"#1a52b3"},
+      {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",logo:"willy.png",bgColor:"#000000"}
     ];
 
     const audio = new Audio();
     let activeStation = null;
+    let prevVolume = 1;
 
     // Timer logic
-    const timerCycles = [0, 15, 30, 60]; // minutes
+    const timerCycles = [0, 15, 30, 60]; 
     let currentTimerCycleIndex = 0;
     let sleepTimeRemaining = 0;
     let timerInterval = null;
 
-    // Helper: Determine if text should be black or white based on background
     function getContrastColor(hexColor) {
       if (!hexColor) return '#ffffff';
       let hex = hexColor.replace('#', '');
@@ -260,6 +263,15 @@
       return (yiq >= 128) ? '#000000' : '#ffffff';
     }
 
+    function hexToRgba(hex, alpha) {
+      let h = hex.replace('#', '');
+      if(h.length === 3) h = h.split('').map(c => c+c).join('');
+      let r = parseInt(h.substring(0,2), 16);
+      let g = parseInt(h.substring(2,4), 16);
+      let b = parseInt(h.substring(4,6), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
     audio.addEventListener('waiting', () => updatePlayerUI('buffering'));
     audio.addEventListener('playing', () => updatePlayerUI('playing'));
     audio.addEventListener('pause', () => updatePlayerUI('paused'));
@@ -268,26 +280,28 @@
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
 
-      stations.forEach(station => {
+      stations.forEach((station, index) => {
         const isPlaying = activeStation && activeStation.id === station.id;
         const textColor = getContrastColor(station.bgColor);
         
         const card = document.createElement('div');
         card.className = `card ${isPlaying ? 'playing' : ''}`;
-        // Apply background and dynamic text color
+        
+        // Staggered animation delay
+        card.style.animationDelay = `${index * 0.05}s`;
+        
         card.style.backgroundColor = station.bgColor || '#1e1e1e';
         card.style.color = textColor;
         
-        // If it's currently playing, we color the active ring with its background color (or gray if it's black)
         if (isPlaying) {
             const glowColor = station.bgColor === '#000000' ? '#555555' : station.bgColor;
-            card.style.boxShadow = `0 0 0 3px var(--bg), 0 0 0 6px ${glowColor}`;
+            card.style.boxShadow = `0 0 0 4px var(--bg), 0 0 0 8px ${glowColor}, 0 15px 30px rgba(0,0,0,0.5)`;
         }
 
         card.onclick = () => selectStation(station);
 
         card.innerHTML = `
-          <img src="${station.logo}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'52\\' height=\\'52\\'><rect width=\\'52\\' height=\\'52\\' fill=\\'%23333\\'/></svg>'">
+          <img src="${station.logo}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'64\\' height=\\'64\\'><rect width=\\'64\\' height=\\'64\\' fill=\\'%23333\\'/></svg>'">
           <div class="name">${station.name}</div>
         `;
         grid.appendChild(card);
@@ -302,9 +316,28 @@
         audio.src = station.streamUrl;
         audio.play();
         
+        // Update Player Bar Content
         document.getElementById('player-bar').classList.add('active');
         document.getElementById('pb-title').innerText = station.name;
         document.getElementById('pb-logo').src = station.logo;
+
+        // Apply dynamic colors to the player bar
+        const textColor = getContrastColor(station.bgColor);
+        const glassBg = hexToRgba(station.bgColor || '#181818', 0.85);
+        
+        document.documentElement.style.setProperty('--pb-bg', glassBg);
+        document.documentElement.style.setProperty('--pb-text', textColor);
+
+        // Hardware Media Controls (Control Center & Keyboard Buttons)
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: station.name,
+            artist: 'Frequency Radio',
+            artwork: [{ src: station.logo, sizes: '512x512', type: 'image/png' }]
+          });
+          navigator.mediaSession.setActionHandler('play', () => audio.play());
+          navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+        }
       }
       render();
     }
@@ -315,24 +348,55 @@
       else audio.pause();
     }
 
+    // Keyboard controls (Spacebar to play/pause)
+    window.addEventListener('keydown', (e) => {
+      if(e.code === 'Space' && activeStation) {
+        e.preventDefault();
+        togglePlayPause();
+      }
+    });
+
     function updateVolume(val) {
       audio.volume = val;
+      if (val > 0) audio.muted = false;
+      updateVolumeIcon();
     }
 
-    // Sleep Timer Logic
+    function toggleMute() {
+      const slider = document.getElementById('volume-slider');
+      if (audio.muted || audio.volume === 0) {
+        audio.muted = false;
+        slider.value = prevVolume > 0 ? prevVolume : 1;
+        audio.volume = slider.value;
+      } else {
+        prevVolume = audio.volume;
+        audio.muted = true;
+        slider.value = 0;
+      }
+      updateVolumeIcon();
+    }
+
+    function updateVolumeIcon() {
+      const icon = document.getElementById('vol-icon');
+      if (audio.muted || audio.volume === 0) {
+        icon.className = 'fa-solid fa-volume-xmark volume-icon';
+      } else if (audio.volume < 0.5) {
+        icon.className = 'fa-solid fa-volume-low volume-icon';
+      } else {
+        icon.className = 'fa-solid fa-volume-high volume-icon';
+      }
+    }
+
     function cycleTimer() {
       currentTimerCycleIndex = (currentTimerCycleIndex + 1) % timerCycles.length;
       const minutes = timerCycles[currentTimerCycleIndex];
       
       clearInterval(timerInterval);
-      const timerBtn = document.getElementById('timer-btn');
       const timerText = document.getElementById('timer-text');
 
       if (minutes === 0) {
-        timerBtn.classList.remove('active');
         timerText.innerText = '';
       } else {
-        timerBtn.classList.add('active');
         sleepTimeRemaining = minutes * 60;
         updateTimerDisplay();
         
@@ -344,7 +408,6 @@
             clearInterval(timerInterval);
             audio.pause();
             currentTimerCycleIndex = 0;
-            timerBtn.classList.remove('active');
             timerText.innerText = '';
           }
         }, 1000);
@@ -368,15 +431,12 @@
       if (state === 'buffering') {
         btn.classList.add('is-buffering');
         status.innerText = "Buffering...";
-        document.title = `Buffering ${activeStation.name}...`;
       } else if (state === 'playing') {
         document.getElementById('pause-icon').style.display = 'block';
-        status.innerText = "Live";
-        document.title = `▶ ${activeStation.name} - Frequency`;
+        status.innerText = "Live Broadcast";
       } else if (state === 'paused') {
         document.getElementById('play-icon').style.display = 'block';
         status.innerText = "Paused";
-        document.title = "Frequency";
       }
       render();
     }
