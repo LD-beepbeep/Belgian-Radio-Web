@@ -2,260 +2,170 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Frequency</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="theme-color" content="#121212">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    /* --- macOS Native Design System --- */
     :root {
-      --app-bg: rgba(30, 30, 30, 0.65);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --text-main: #ffffff;
-      --text-muted: rgba(255, 255, 255, 0.55);
-      --hover-bg: rgba(255, 255, 255, 0.1);
-      --active-bg: rgba(255, 255, 255, 0.15);
-      --accent: #0A84FF; /* macOS Blue */
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --card-hover: #2a2a2a;
+      --text: #ffffff;
+      --text-muted: #a0a0a0;
+      --accent: #10b981;
     }
 
     body {
       margin: 0;
-      height: 100vh;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      /* A subtle abstract background to show off the glass effect */
-      background: linear-gradient(135deg, #2c2c2e 0%, #000000 100%);
-      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      padding: 2rem;
+      padding-bottom: 100px; /* Space for the bottom player */
       user-select: none;
     }
 
-    /* The Main App Window */
-    .app-window {
-      width: 800px;
-      height: 600px;
-      background: var(--app-bg);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      border-radius: 12px;
-      border: 1px solid var(--glass-border);
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* macOS Titlebar */
-    .titlebar {
-      height: 52px;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      border-bottom: 1px solid var(--glass-border);
-      background: rgba(0, 0, 0, 0.2);
-    }
-
-    .traffic-lights {
-      display: flex;
-      gap: 8px;
-      width: 60px;
-    }
-
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-    .dot.red { background: #FF5F56; border: .5px solid #E0443E; }
-    .dot.yellow { background: #FFBD2E; border: .5px solid #DEA123; }
-    .dot.green { background: #27C93F; border: .5px solid #1AAB29; }
-
-    .window-title {
-      flex: 1;
-      text-align: center;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
       color: var(--text-muted);
-      margin-right: 60px; /* offset traffic lights to center title */
-    }
-
-    /* Content Area */
-    .content {
-      flex: 1;
-      padding: 32px;
-      overflow-y: auto;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 1.2rem;
+      width: 100%;
+      max-width: 800px;
     }
 
     /* Station Cards */
-    .station-card {
-      background: transparent;
+    .card {
+      background-color: var(--card-bg);
       border-radius: 12px;
-      padding: 20px 12px;
+      padding: 1.2rem 1rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
     }
 
-    .station-card:hover {
-      background: var(--hover-bg);
+    .card:hover {
+      background-color: var(--card-hover);
+      transform: translateY(-2px);
     }
 
-    .station-card.playing {
-      background: var(--active-bg);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    .card.playing {
+      border-color: var(--accent);
+      background-color: rgba(16, 185, 129, 0.05);
     }
 
-    .station-card img {
-      width: 72px;
-      height: 72px;
-      border-radius: 16px;
-      object-fit: cover;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease;
+    .card img {
+      width: 52px; /* SCALED SMALLER */
+      height: 52px;
+      object-fit: contain;
+      margin-bottom: 1rem;
+      border-radius: 8px;
     }
 
-    .station-card.playing img {
-      transform: scale(1.05);
-    }
+    .card .name { font-size: 0.85rem; font-weight: 600; text-align: center; }
 
-    .station-name {
-      font-size: 13px;
-      font-weight: 500;
-      text-align: center;
-    }
-
-    /* Bottom Player Bar */
+    /* Player Bar */
     .player-bar {
-      height: 80px;
-      background: rgba(20, 20, 20, 0.4);
-      border-top: 1px solid var(--glass-border);
+      position: fixed;
+      bottom: 0; left: 0; width: 100%;
+      background-color: rgba(24, 24, 24, 0.85);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 1rem 2rem;
       display: flex;
-      align-items: center;
-      padding: 0 32px;
       justify-content: space-between;
-      backdrop-filter: blur(20px);
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      pointer-events: none;
-    }
-
-    .player-bar.visible {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    .now-playing {
-      display: flex;
       align-items: center;
-      gap: 16px;
-      width: 30%;
-    }
-
-    .now-playing img {
-      width: 48px;
-      height: 48px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .track-info .title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .track-info .status { font-size: 12px; color: var(--text-muted); }
-
-    /* Controls */
-    .controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 40%;
-    }
-
-    .play-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--text-main);
-      color: #000;
-      border: none;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      font-size: 18px;
-      transition: transform 0.1s;
+      border-top: 1px solid #333;
+      box-sizing: border-box;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
     }
     
+    .player-bar.active { transform: translateY(0); }
+
+    .now-playing { display: flex; align-items: center; gap: 1rem; width: 33%; }
+    .now-playing img { width: 44px; height: 44px; border-radius: 8px; }
+    .now-playing .title { font-weight: bold; font-size: 0.95rem; margin-bottom: 4px; }
+    .now-playing .status { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Controls */
+    .controls { display: flex; align-items: center; justify-content: center; width: 33%; }
+    
+    .play-btn {
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.1s;
+    }
     .play-btn:active { transform: scale(0.95); }
 
-    /* Buffering Animation */
-    .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid rgba(0,0,0,0.1);
-      border-top-color: #000;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .is-buffering .spinner { display: block; }
-    .is-buffering .icon { display: none; }
+    /* Buffering Spinner inside button */
+    .fa-spinner { display: none; }
+    .is-buffering .fa-spinner { display: block; animation: spin 1s linear infinite; }
+    .is-buffering .fa-play, .is-buffering .fa-pause { display: none !important; }
 
-    /* Scrollbar hidden for clean look */
-    ::-webkit-scrollbar { width: 0px; background: transparent; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-  <div class="app-window">
-    <div class="titlebar">
-      <div class="traffic-lights">
-        <div class="dot red"></div>
-        <div class="dot yellow"></div>
-        <div class="dot green"></div>
-      </div>
-      <div class="window-title">Frequency</div>
-    </div>
+  <h1>Frequency</h1>
+  <div class="grid" id="grid"></div>
 
-    <div class="content">
-      <div class="grid" id="grid"></div>
-    </div>
-
-    <div class="player-bar" id="player-bar">
-      <div class="now-playing">
-        <img id="pb-logo" src="" alt="">
-        <div class="track-info">
-          <div class="title" id="pb-title">Station</div>
-          <div class="status" id="pb-status">Ready</div>
-        </div>
+  <div class="player-bar" id="player-bar">
+    <div class="now-playing">
+      <img id="pb-logo" src="" alt="logo">
+      <div>
+        <div class="title" id="pb-title">Station Name</div>
+        <div class="status" id="pb-status">Ready</div>
       </div>
-      
-      <div class="controls">
-        <button class="play-btn" id="play-btn" onclick="togglePlay()">
-          <span class="icon" id="play-icon">▶</span>
-          <span class="icon" id="pause-icon" style="display: none;">⏸</span>
-          <div class="spinner"></div>
-        </button>
-      </div>
-      
-      <div style="width: 30%;"></div>
     </div>
-  </div>
+    
+    <div class="controls">
+      <button class="play-btn" id="play-btn" onclick="togglePlayPause()">
+        <i class="fa-solid fa-play" id="play-icon"></i>
+        <i class="fa-solid fa-pause" id="pause-icon" style="display: none;"></i>
+        <i class="fa-solid fa-spinner" id="spinner-icon"></i>
+      </button>
+    </div>
+    
+    <div style="width: 33%;"></div> </div>
 
   <script>
-    // 1. Data
+    // Register Service Worker for PWA (Installability)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed: ', err));
+      });
+    }
+
     const stations = [
       {id:"stubru",name:"Studio Brussel",streamUrl:"https://icecast.vrtcdn.be/stubru-high.mp3",logo:"stubru.jpg"},
       {id:"boenkerz",name:"Boenkerz",streamUrl:"https://altair.streamerr.co:8096/boenkerz",logo:"boenkerz.jpg"},
@@ -268,64 +178,55 @@
       {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",logo:"willy.png"}
     ];
 
-    // 2. Audio Engine
     const audio = new Audio();
-    let currentStation = null;
+    let activeStation = null;
 
     // Audio Event Listeners
-    audio.addEventListener('waiting', () => updateUI('buffering'));
-    audio.addEventListener('playing', () => updateUI('playing'));
-    audio.addEventListener('pause', () => updateUI('paused'));
-    audio.addEventListener('error', () => {
-        alert("Stream unavailable right now.");
-        updateUI('paused');
-    });
+    audio.addEventListener('waiting', () => updatePlayerUI('buffering'));
+    audio.addEventListener('playing', () => updatePlayerUI('playing'));
+    audio.addEventListener('pause', () => updatePlayerUI('paused'));
 
-    // 3. Render Grid
     function render() {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
 
       stations.forEach(station => {
-        const isPlaying = currentStation && currentStation.id === station.id;
+        const isPlaying = activeStation && activeStation.id === station.id;
         const card = document.createElement('div');
-        card.className = `station-card ${isPlaying ? 'playing' : ''}`;
+        card.className = `card ${isPlaying ? 'playing' : ''}`;
         card.onclick = () => selectStation(station);
 
-        // Uses an empty transparent square if logo fails to load
         card.innerHTML = `
-          <img src="${station.logo}" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='">
-          <div class="station-name">${station.name}</div>
+          <img src="${station.logo}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'52\\' height=\\'52\\'><rect width=\\'52\\' height=\\'52\\' fill=\\'%23333\\'/></svg>'">
+          <div class="name">${station.name}</div>
         `;
         grid.appendChild(card);
       });
     }
 
-    // 4. Playback Logic
     function selectStation(station) {
-      if (currentStation && currentStation.id === station.id) {
-        togglePlay();
+      if (activeStation && activeStation.id === station.id) {
+        togglePlayPause();
       } else {
-        currentStation = station;
+        activeStation = station;
         audio.src = station.streamUrl;
         audio.play();
         
-        // Show player bar
-        document.getElementById('player-bar').classList.add('visible');
-        document.getElementById('pb-logo').src = station.logo;
+        // Show Player Bar
+        document.getElementById('player-bar').classList.add('active');
         document.getElementById('pb-title').innerText = station.name;
-        
-        render(); // Update highlights
+        document.getElementById('pb-logo').src = station.logo;
       }
+      render();
     }
 
-    function togglePlay() {
-      if (!currentStation) return;
+    function togglePlayPause() {
+      if (!activeStation) return;
       if (audio.paused) audio.play();
       else audio.pause();
     }
 
-    function updateUI(state) {
+    function updatePlayerUI(state) {
       const btn = document.getElementById('play-btn');
       const status = document.getElementById('pb-status');
       
@@ -335,17 +236,22 @@
 
       if (state === 'buffering') {
         btn.classList.add('is-buffering');
-        status.innerText = "Connecting...";
+        status.innerText = "Buffering...";
+        document.title = `Buffering ${activeStation.name}...`;
       } else if (state === 'playing') {
         document.getElementById('pause-icon').style.display = 'block';
-        status.innerText = "Live Broadcast";
+        status.innerText = "Live";
+        // DYNAMIC TITLE 
+        document.title = `▶ ${activeStation.name} - Frequency`;
       } else if (state === 'paused') {
         document.getElementById('play-icon').style.display = 'block';
         status.innerText = "Paused";
+        // RESET TITLE
+        document.title = "Frequency";
       }
+      render();
     }
 
-    // Initialize
     render();
   </script>
 </body>
