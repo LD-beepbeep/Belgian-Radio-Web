@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belgian Radio</title>
+  <style>
+    /* --- CSS STYLES --- */
+    :root {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --card-hover: #2a2a2a;
+      --text-main: #ffffff;
+      --text-muted: #a0a0a0;
+      --accent: #10b981; /* Green accent for playing state */
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .station-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+
+    .station-card:hover {
+      background-color: var(--card-hover);
+      transform: translateY(-2px);
+    }
+
+    .station-card.playing {
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .station-logo {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .station-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Bottom Player Bar */
+    .player-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: var(--card-bg);
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-top: 1px solid #333;
+    }
+
+    .status-text {
+      font-size: 0.9rem;
+      color: var(--accent);
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Belgian Radio</h1>
+  
+  <div class="grid" id="station-grid"></div>
+
+  <div class="player-bar" id="player-bar" style="display: none;">
+    <span class="status-text" id="status-text">Now Playing: ...</span>
+  </div>
+
+  <script>
+    /* --- JAVASCRIPT LOGIC --- */
+    
+    // 1. Define your stations here!
+    // Replace the stream URLs with the actual radio stream links
+    const stations = [
+      { id: 'qmusic', name: 'Q-Music', logo: 'q-music.png', stream: 'https://icecast-qmusicbe-cdp.flb.ssl.tech.dpgmedia.be/qmusic_be_live.mp3' },
+      { id: 'topradio', name: 'TOPradio', logo: 'top.png', stream: 'https://topradio-be.cdn.dmdsd.com/topradio.mp3' },
+      { id: 'studiobrussel', name: 'Studio Brussel', logo: 'stubru.png', stream: 'https://icecast.vrtcdn.be/stubru-high.mp3' },
+      // Add as many as you want...
+    ];
+
+    const audio = new Audio();
+    let currentStationId = null;
+
+    const grid = document.getElementById('station-grid');
+    const playerBar = document.getElementById('player-bar');
+    const statusText = document.getElementById('status-text');
+
+    // 2. Render the stations to the screen
+    function renderStations() {
+      grid.innerHTML = ''; // Clear grid
+
+      stations.forEach(station => {
+        const card = document.createElement('div');
+        card.className = `station-card ${currentStationId === station.id ? 'playing' : ''}`;
+        card.onclick = () => togglePlay(station);
+
+        card.innerHTML = `
+          <img src="${station.logo}" alt="${station.name}" class="station-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'64\\' height=\\'64\\'><rect width=\\'64\\' height=\\'64\\' fill=\\'%23333\\'/></svg>'">
+          <div class="station-name">${station.name}</div>
+        `;
+        
+        grid.appendChild(card);
+      });
+    }
+
+    // 3. Handle Play/Pause logic
+    function togglePlay(station) {
+      // If clicking the currently playing station, pause it
+      if (currentStationId === station.id) {
+        audio.pause();
+        currentStationId = null;
+        playerBar.style.display = 'none';
+      } else {
+        // Play new station
+        currentStationId = station.id;
+        audio.src = station.stream;
+        audio.play();
+        
+        // Update UI
+        playerBar.style.display = 'flex';
+        statusText.innerText = `🔊 Now Playing: ${station.name}`;
+      }
+      
+      // Re-render to update the green highlight ring
+      renderStations();
+    }
+
+    // Initialize the app
+    renderStations();
+
+  </script>
+</body>
+</html>
