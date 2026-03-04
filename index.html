@@ -141,12 +141,12 @@
 
     .now-playing { display: flex; align-items: center; gap: 1rem; width: 30%; }
     .now-playing img {
-      width: 50px; 
-      height: 50px;
+      width: 40px; 
+      height: 40px;
       object-fit: contain;
       
       /* Match the seamless style */
-      border-radius: 2px;
+      border-radius: 0;
       box-shadow: none;
       filter: none;
     }
@@ -220,8 +220,6 @@
     .is-buffering .fa-play, .is-buffering .fa-pause { display: none !important; }
 
     @keyframes spin { 100% { transform: rotate(360deg); } }
-    /* Fix the Player Bar "Transformation" - Keeping it Dark & Consistent */
-
   </style>
 </head>
 <body>
@@ -430,7 +428,12 @@
         document.getElementById('pb-title').innerText = station.name;
         document.getElementById('pb-logo').src = station.logo;
 
-
+        // Apply dynamic colors to the player bar
+        const textColor = getContrastColor(station.bgColor);
+        const glassBg = hexToRgba(station.bgColor || '#181818', 0.85);
+        
+        document.documentElement.style.setProperty('--pb-bg', glassBg);
+        document.documentElement.style.setProperty('--pb-text', textColor);
 
         // Hardware Media Controls (Control Center & Keyboard Buttons)
         if ('mediaSession' in navigator) {
