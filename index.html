@@ -141,12 +141,12 @@
 
     .now-playing { display: flex; align-items: center; gap: 1rem; width: 30%; }
     .now-playing img {
-      width: 40px; 
-      height: 40px;
+      width: 50px; 
+      height: 50px;
       object-fit: contain;
       
       /* Match the seamless style */
-      border-radius: 0;
+      border-radius: 2px;
       box-shadow: none;
       filter: none;
     }
@@ -220,6 +220,14 @@
     .is-buffering .fa-play, .is-buffering .fa-pause { display: none !important; }
 
     @keyframes spin { 100% { transform: rotate(360deg); } }
+    /* Fix the Player Bar "Transformation" - Keeping it Dark & Consistent */
+.player-bar {
+  /* Change these to fixed colors if you want to stop the transformation */
+  background-color: rgba(18, 18, 18, 0.95) !important; 
+  color: #ffffff !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
   </style>
 </head>
 <body>
