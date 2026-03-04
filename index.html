@@ -436,12 +436,7 @@
         document.getElementById('pb-title').innerText = station.name;
         document.getElementById('pb-logo').src = station.logo;
 
-        // Apply dynamic colors to the player bar
-        const textColor = getContrastColor(station.bgColor);
-        const glassBg = hexToRgba(station.bgColor || '#181818', 0.85);
-        
-        document.documentElement.style.setProperty('--pb-bg', glassBg);
-        document.documentElement.style.setProperty('--pb-text', textColor);
+
 
         // Hardware Media Controls (Control Center & Keyboard Buttons)
         if ('mediaSession' in navigator) {
