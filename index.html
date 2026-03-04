@@ -140,17 +140,16 @@
     .player-bar.active { transform: translateY(0); }
 
     .now-playing { display: flex; align-items: center; gap: 1rem; width: 30%; }
-    /* 2. Player Bar Logo */
-.now-playing img {
-  width: 40px; /* Reduced from 50px for a cleaner look */
-  height: 40px;
-  border-radius: 4px;
-  object-fit: contain;
-  
-  /* Match the clean drop-shadow style */
-  box-shadow: none;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-}
+    .now-playing img {
+      width: 40px; 
+      height: 40px;
+      object-fit: contain;
+      
+      /* Match the seamless style */
+      border-radius: 0;
+      box-shadow: none;
+      filter: none;
+    }
     .now-playing .title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; letter-spacing: 0.5px;}
     .now-playing .status { font-size: 0.75rem; opacity: 0.8; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;}
 
@@ -542,7 +541,7 @@
         status.innerText = "Buffering...";
       } else if (state === 'playing') {
         document.getElementById('pause-icon').style.display = 'block';
-        status.innerText = "Live Broadcast";
+        status.innerText = "Playing";
       } else if (state === 'paused') {
         document.getElementById('play-icon').style.display = 'block';
         status.innerText = "Paused";
