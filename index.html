@@ -19,7 +19,7 @@
       --accent: #10b981;
       
       /* Dynamic Player Bar Variables */
-      --pb-bg: rgba(24, 24, 24, 0.9);
+      --pb-bg: rgba(24, 24, 24, 0.95);
       --pb-text: #ffffff;
     }
 
@@ -45,10 +45,8 @@
       align-content: start;
     }
 
-    /* Premium Entrance Animation */
     @keyframes fadeUpBounce {
       0% { opacity: 0; transform: translateY(30px) scale(0.95); }
-      60% { opacity: 1; transform: translateY(-5px) scale(1.02); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
@@ -59,9 +57,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       cursor: pointer;
       border: 1px solid rgba(255, 255, 255, 0.08); 
-      position: relative; /* For absolute positioning of favorite icon */
+      position: relative;
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       opacity: 0;
       animation: fadeUpBounce 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
@@ -70,12 +69,7 @@
     .card:hover, .card:focus-visible {
       transform: translateY(-6px) scale(1.03);
       filter: brightness(1.1);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
       outline: none;
-    }
-
-    .card:focus-visible {
-      border-color: var(--text);
     }
 
     .card.playing {
@@ -83,17 +77,29 @@
       z-index: 2;
     }
 
+    /* Add Custom Station Button */
+    .card.add-btn {
+      background: transparent !important;
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      color: var(--text-muted);
+    }
+    .card.add-btn:hover { border-color: var(--text); color: var(--text); }
+    .card.add-btn i { font-size: 2rem; margin-bottom: 0.8rem; }
+
+    /* Seamless Logos */
     .card img {
-      width: 64px;
-      height: 64px;
+      width: 44px;
+      height: 44px;
       object-fit: contain;
-      margin-bottom: 1rem;
-      border-radius: 4px;
-      box-shadow: none; /* Removed shadow per request */
+      margin-bottom: 0.8rem;
+      border-radius: 0;
+      box-shadow: none;
+      filter: none;
+      background: transparent;
     }
 
     .card .name { 
-      font-size: 0.9rem; 
+      font-size: 0.85rem; 
       font-weight: 600; 
       text-align: center; 
       letter-spacing: 0.5px;
@@ -103,19 +109,13 @@
       position: absolute;
       top: 12px;
       right: 12px;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
-      opacity: 0.5;
+      opacity: 0.4;
       transition: opacity 0.2s, transform 0.2s;
     }
-    .favorite-btn:hover, .favorite-btn:focus-visible {
-      opacity: 1;
-      transform: scale(1.1);
-      outline: none;
-    }
-    .favorite-btn.active {
-      opacity: 1;
-    }
+    .favorite-btn:hover { opacity: 1; transform: scale(1.1); }
+    .favorite-btn.active { opacity: 1; color: #ff4b2b; }
 
     /* Dynamic Player Bar */
     .player-bar {
@@ -140,20 +140,15 @@
     .player-bar.active { transform: translateY(0); }
 
     .now-playing { display: flex; align-items: center; gap: 1rem; width: 30%; }
-    .now-playing img {
+    .now-playing img { 
       width: 40px; 
-      height: 40px;
+      height: 40px; 
+      border-radius: 0; 
       object-fit: contain;
-      
-      /* Match the seamless style */
-      border-radius: 5px;
-      box-shadow: none;
-      filter: none;
     }
-    .now-playing .title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; letter-spacing: 0.5px;}
+    .now-playing .title { font-weight: 700; font-size: 1rem; margin-bottom: 4px;}
     .now-playing .status { font-size: 0.75rem; opacity: 0.8; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;}
 
-    /* Controls */
     .controls { display: flex; align-items: center; justify-content: center; width: 40%; gap: 1.5rem; }
     
     .play-btn {
@@ -168,58 +163,51 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.4s ease, color 0.4s ease;
+      transition: transform 0.2s, background-color 0.4s ease, color 0.4s ease;
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
     .play-btn:hover { transform: scale(1.08); }
     .play-btn:active { transform: scale(0.95); }
 
-    /* Tools */
-    .tools { 
-      display: flex; 
-      align-items: center; 
-      justify-content: flex-end; 
-      width: 30%; 
-      gap: 1.5rem; 
-      color: var(--pb-text);
-      opacity: 0.9;
-    }
-
+    .tools { display: flex; align-items: center; justify-content: flex-end; width: 30%; gap: 1.5rem; color: var(--pb-text); opacity: 0.9;}
     .timer-container, .volume-icon { cursor: pointer; transition: opacity 0.2s; }
     .timer-container:hover, .volume-icon:hover { opacity: 0.7; }
-    
     .timer-container { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; }
     .timer-text { font-size: 0.85rem; font-variant-numeric: tabular-nums; font-weight: bold; }
-
     .volume-container { display: flex; align-items: center; gap: 0.8rem; }
     
-    input[type=range] {
-      -webkit-appearance: none;
-      width: 90px;
-      background: transparent;
-    }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      height: 14px; width: 14px;
-      border-radius: 50%;
-      background: var(--pb-text);
-      cursor: pointer;
-      margin-top: -5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    }
-    input[type=range]::-webkit-slider-runnable-track {
-      width: 100%; height: 4px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.3);
-      border-radius: 2px;
-    }
+    input[type=range] { -webkit-appearance: none; width: 90px; background: transparent; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: var(--pb-text); cursor: pointer; margin-top: -5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.3); border-radius: 2px; }
 
-    /* Spinner */
     .fa-spinner { display: none; }
     .is-buffering .fa-spinner { display: block; animation: spin 1s linear infinite; }
     .is-buffering .fa-play, .is-buffering .fa-pause { display: none !important; }
-
     @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+      display: none; justify-content: center; align-items: center; z-index: 200;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    .modal {
+      background: #1e1e1e; padding: 2rem; border-radius: 16px; width: 90%; max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+    }
+    .modal h2 { margin-top: 0; font-size: 1.2rem; margin-bottom: 1.5rem; }
+    .modal label { display: block; font-size: 0.8rem; margin-bottom: 0.3rem; color: var(--text-muted); }
+    .modal input { 
+      width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 8px; 
+      border: 1px solid rgba(255,255,255,0.2); background: #121212; color: white; box-sizing: border-box;
+    }
+    .modal input[type="color"] { padding: 0; height: 40px; cursor: pointer; }
+    .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
+    .modal-actions button { padding: 0.6rem 1.2rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+    .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3) !important; }
+    .btn-save { background: white; color: black; }
   </style>
 </head>
 <body>
@@ -244,13 +232,35 @@
     </div>
     
     <div class="tools">
-      <div class="timer-container" id="timer-btn" onclick="cycleTimer()" tabindex="0" onkeydown="if(event.key==='Enter') cycleTimer()">
+      <div class="timer-container" id="timer-btn" onclick="cycleTimer()" tabindex="0">
         <i class="fa-solid fa-moon"></i>
         <span class="timer-text" id="timer-text"></span>
       </div>
       <div class="volume-container">
-        <i class="fa-solid fa-volume-low volume-icon" id="vol-icon" onclick="toggleMute()" tabindex="0" onkeydown="if(event.key==='Enter') toggleMute()"></i>
+        <i class="fa-solid fa-volume-low volume-icon" id="vol-icon" onclick="toggleMute()" tabindex="0"></i>
         <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="1" oninput="updateVolume(this.value)" tabindex="0">
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal">
+      <h2>Add Custom Station</h2>
+      <label>Station Name</label>
+      <input type="text" id="cs-name" placeholder="e.g. My Awesome Radio">
+      
+      <label>Stream URL (mp3/aac)</label>
+      <input type="url" id="cs-url" placeholder="https://...">
+      
+      <label>Logo Image URL (optional)</label>
+      <input type="url" id="cs-logo" placeholder="https://.../logo.png">
+      
+      <label>Brand Background Color</label>
+      <input type="color" id="cs-color" value="#ffffff">
+      
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+        <button class="btn-save" onclick="saveCustomStation()">Save Station</button>
       </div>
     </div>
   </div>
@@ -262,16 +272,17 @@
       });
     }
 
-    const stations = [
+    const defaultStations = [
       {id:"stubru",name:"Studio Brussel",streamUrl:"https://icecast.vrtcdn.be/stubru-high.mp3",logo:"stubru.jpg",bgColor:"#ffffff"},
+      {id:"npo3fm",name:"NPO 3FM",streamUrl:"https://icecast.omroep.nl/3fm-bb-mp3",logo:"3fm.png",bgColor:"#15171E"},
       {id:"boenkerz",name:"Boenkerz",streamUrl:"https://altair.streamerr.co:8096/boenkerz",logo:"boenkerz.jpg",bgColor:"#ffffff"},
       {id:"tijdloze",name:"De Tijdloze",streamUrl:"https://icecast.vrtcdn.be/stubru_tijdloze-high.mp3",logo:"detijdloze.png",bgColor:"#ffe682"},
       {id:"mnm",name:"MNM",streamUrl:"https://icecast.vrtcdn.be/mnm-high.mp3",logo:"mnm.png",bgColor:"#feff56"},
       {id:"topradio",name:"TOPradio",streamUrl:"https://27783.live.streamtheworld.com/TOP_RADIO.mp3",logo:"top.png",bgColor:"#ffffff"},
       {id:"radio1",name:"Radio 1",streamUrl:"https://icecast.vrtcdn.be/radio1-high.mp3",logo:"radio1.png",bgColor:"#ffffff"},
-      {id:"npo3fm",name:"NPO 3FM",streamUrl:"https://icecast.omroep.nl/3fm-bb-mp3",logo:"3fm.png",bgColor:"#0D1017"},
+      {id:"npo1",name:"NPO Radio 1",streamUrl:"https://icecast.omroep.nl/radio1-bb-aac",logo:"npo1.png",bgColor:"#2058FF"},
       {id:"qmusic",name:"Qmusic",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/qmusic.mp3",logo:"qmusic.png",bgColor:"#ffffff"},
-      {id:"joe",name:"JOE",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/joe_fm/mp3",logo:"joe.png",bgColor:"#184AB0"},
+      {id:"joe",name:"JOE",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/joe_fm/mp3",logo:"joe.png",bgColor:"#1a52b3"},
       {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",logo:"willy.png",bgColor:"#000000"}
     ];
 
@@ -279,12 +290,17 @@
     let activeStation = null;
     let prevVolume = 1;
     let favorites = JSON.parse(localStorage.getItem('freq_favorites')) || [];
+    let customStations = JSON.parse(localStorage.getItem('freq_custom_stations')) || [];
 
     // Timer logic
     const timerCycles = [0, 15, 30, 60]; 
     let currentTimerCycleIndex = 0;
     let sleepTimeRemaining = 0;
     let timerInterval = null;
+
+    function getAllStations() {
+      return [...defaultStations, ...customStations];
+    }
 
     function getContrastColor(hexColor) {
       if (!hexColor) return '#ffffff';
@@ -305,7 +321,6 @@
       return `rgba(${r},${g},${b},${alpha})`;
     }
 
-    // Media Session Tracking & UI State Updates
     audio.addEventListener('waiting', () => {
         updatePlayerUI('buffering');
         if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
@@ -320,10 +335,10 @@
     });
 
     function getSortedStations() {
-      return [...stations].sort((a, b) => {
+      return getAllStations().sort((a, b) => {
         const aFav = favorites.includes(a.id) ? 1 : 0;
         const bFav = favorites.includes(b.id) ? 1 : 0;
-        return bFav - aFav; // Favorites bubble to the top
+        return bFav - aFav; 
       });
     }
 
@@ -339,60 +354,59 @@
         const card = document.createElement('div');
         card.className = 'card';
         card.id = `card-${station.id}`;
-        card.tabIndex = 0; // Keyboard Accessibility
+        card.tabIndex = 0; 
         
-        // Disable animation if re-rendering due to favorites toggle
         card.style.animationDelay = `${index * 0.05}s`;
         card.style.backgroundColor = station.bgColor || '#1e1e1e';
         card.style.color = textColor;
 
-        // Restore active styling if playing
         if (activeStation && activeStation.id === station.id) {
           card.classList.add('playing');
           const glowColor = station.bgColor === '#000000' ? '#555555' : station.bgColor;
           card.style.boxShadow = `0 0 0 4px var(--bg), 0 0 0 8px ${glowColor}, 0 15px 30px rgba(0,0,0,0.5)`;
         }
 
-        // Mouse click and Keyboard Enter selection
         card.onclick = () => selectStation(station);
         card.onkeydown = (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                selectStation(station);
-            }
+            if (e.key === 'Enter') { e.preventDefault(); selectStation(station); }
         };
 
         const heartClass = isFav ? 'fa-solid active' : 'fa-regular';
-        
+        // Use a generic icon if logo fails to load or isn't provided
+        const logoHTML = station.logo 
+            ? `<img src="${station.logo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+               <i class="fa-solid fa-radio" style="display:none; font-size: 2rem; margin-bottom: 0.8rem; color: ${textColor}; opacity: 0.5;"></i>`
+            : `<i class="fa-solid fa-radio" style="font-size: 2rem; margin-bottom: 0.8rem; color: ${textColor}; opacity: 0.5;"></i>`;
+
         card.innerHTML = `
           <i class="${heartClass} fa-heart favorite-btn" 
-             onclick="toggleFavorite(event, '${station.id}')"
-             onkeydown="handleFavKey(event, '${station.id}')" 
-             tabindex="0" aria-label="Toggle Favorite"></i>
-          <img src="${station.logo}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'64\\' height=\\'64\\'><rect width=\\'64\\' height=\\'64\\' fill=\\'%23333\\'/></svg>'">
+             onclick="toggleFavorite(event, '${station.id}')" tabindex="0"></i>
+          ${logoHTML}
           <div class="name">${station.name}</div>
         `;
         grid.appendChild(card);
       });
+
+      // Append "Add Custom Station" Button
+      const addBtn = document.createElement('div');
+      addBtn.className = 'card add-btn';
+      addBtn.tabIndex = 0;
+      addBtn.onclick = openAddModal;
+      addBtn.onkeydown = (e) => { if (e.key === 'Enter') openAddModal(); };
+      addBtn.innerHTML = `
+        <i class="fa-solid fa-plus"></i>
+        <div class="name">Add Custom</div>
+      `;
+      grid.appendChild(addBtn);
     }
 
     function toggleFavorite(e, id) {
-        e.stopPropagation(); // Prevents clicking the card beneath
-        if (favorites.includes(id)) {
-            favorites = favorites.filter(favId => favId !== id);
-        } else {
-            favorites.push(id);
-        }
+        e.stopPropagation(); 
+        if (favorites.includes(id)) favorites = favorites.filter(favId => favId !== id);
+        else favorites.push(id);
+        
         localStorage.setItem('freq_favorites', JSON.stringify(favorites));
-        // Re-render grid to apply sorting
         initGrid(); 
-    }
-
-    function handleFavKey(e, id) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            toggleFavorite(e, id);
-        }
     }
 
     function updateGridStyles(activeStationId) {
@@ -420,27 +434,31 @@
         audio.src = station.streamUrl;
         audio.play();
         
-        // Dynamic App Title
-        document.title = `${station.name} - Frequency`;
+        document.title = `${station.name} | Frequency`;
         
-        // Update Player Bar Content
         document.getElementById('player-bar').classList.add('active');
         document.getElementById('pb-title').innerText = station.name;
-        document.getElementById('pb-logo').src = station.logo;
+        
+        const logoImg = document.getElementById('pb-logo');
+        if(station.logo) {
+            logoImg.style.display = 'block';
+            logoImg.src = station.logo;
+        } else {
+            logoImg.style.display = 'none';
+        }
 
-        // Apply dynamic colors to the player bar
+        // DYNAMIC COLOR TRANSFORMATION (RESTORED)
         const textColor = getContrastColor(station.bgColor);
-        const glassBg = hexToRgba(station.bgColor || '#181818', 0.85);
+        const glassBg = hexToRgba(station.bgColor || '#181818', 0.95);
         
         document.documentElement.style.setProperty('--pb-bg', glassBg);
         document.documentElement.style.setProperty('--pb-text', textColor);
 
-        // Hardware Media Controls (Control Center & Keyboard Buttons)
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
             title: station.name,
             artist: 'Frequency Radio',
-            artwork: [{ src: station.logo, sizes: '512x512', type: 'image/png' }]
+            artwork: station.logo ? [{ src: station.logo, sizes: '512x512', type: 'image/png' }] : []
           });
           navigator.mediaSession.setActionHandler('play', () => audio.play());
           navigator.mediaSession.setActionHandler('pause', () => audio.pause());
@@ -455,10 +473,8 @@
       else audio.pause();
     }
 
-    // Keyboard controls (Spacebar to play/pause globally)
     window.addEventListener('keydown', (e) => {
-      // Don't trigger spacebar play/pause if navigating buttons
-      if(e.code === 'Space' && activeStation && document.activeElement.tagName !== 'BUTTON' && document.activeElement.tagName !== 'I' && !document.activeElement.classList.contains('card')) {
+      if(e.code === 'Space' && activeStation && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'BUTTON') {
         e.preventDefault();
         togglePlayPause();
       }
@@ -486,32 +502,24 @@
 
     function updateVolumeIcon() {
       const icon = document.getElementById('vol-icon');
-      if (audio.muted || audio.volume === 0) {
-        icon.className = 'fa-solid fa-volume-xmark volume-icon';
-      } else if (audio.volume < 0.5) {
-        icon.className = 'fa-solid fa-volume-low volume-icon';
-      } else {
-        icon.className = 'fa-solid fa-volume-high volume-icon';
-      }
+      if (audio.muted || audio.volume === 0) icon.className = 'fa-solid fa-volume-xmark volume-icon';
+      else if (audio.volume < 0.5) icon.className = 'fa-solid fa-volume-low volume-icon';
+      else icon.className = 'fa-solid fa-volume-high volume-icon';
     }
 
     function cycleTimer() {
       currentTimerCycleIndex = (currentTimerCycleIndex + 1) % timerCycles.length;
       const minutes = timerCycles[currentTimerCycleIndex];
-      
       clearInterval(timerInterval);
       const timerText = document.getElementById('timer-text');
 
-      if (minutes === 0) {
-        timerText.innerText = '';
-      } else {
+      if (minutes === 0) timerText.innerText = '';
+      else {
         sleepTimeRemaining = minutes * 60;
         updateTimerDisplay();
-        
         timerInterval = setInterval(() => {
           sleepTimeRemaining--;
           updateTimerDisplay();
-          
           if (sleepTimeRemaining <= 0) {
             clearInterval(timerInterval);
             audio.pause();
@@ -541,15 +549,47 @@
         status.innerText = "Buffering...";
       } else if (state === 'playing') {
         document.getElementById('pause-icon').style.display = 'block';
-        status.innerText = "Playing";
+        status.innerText = "Live Broadcast";
       } else if (state === 'paused') {
         document.getElementById('play-icon').style.display = 'block';
         status.innerText = "Paused";
       }
-      // Removed the endless rendering loop from here!
     }
 
-    // Initialize the grid on first load
+    // Modal Logic
+    function openAddModal() { document.getElementById('add-modal').classList.add('active'); }
+    function closeAddModal() { 
+        document.getElementById('add-modal').classList.remove('active'); 
+        // Clear inputs
+        document.getElementById('cs-name').value = '';
+        document.getElementById('cs-url').value = '';
+        document.getElementById('cs-logo').value = '';
+        document.getElementById('cs-color').value = '#ffffff';
+    }
+    
+    function saveCustomStation() {
+        const name = document.getElementById('cs-name').value.trim();
+        const url = document.getElementById('cs-url').value.trim();
+        const logo = document.getElementById('cs-logo').value.trim();
+        const color = document.getElementById('cs-color').value;
+
+        if(!name || !url) return alert('Station Name and Stream URL are required!');
+
+        const newStation = {
+            id: 'custom_' + Date.now(),
+            name: name,
+            streamUrl: url,
+            logo: logo || null,
+            bgColor: color
+        };
+
+        customStations.push(newStation);
+        localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
+        
+        closeAddModal();
+        initGrid(); // Refresh to show new station
+    }
+
     initGrid();
   </script>
 </body>
