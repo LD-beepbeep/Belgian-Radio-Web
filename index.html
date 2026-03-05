@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -13,14 +13,26 @@
 
   <style>
     :root {
+      /* Dark Theme Defaults */
       --bg: #121212;
       --text: #ffffff;
       --text-muted: #a0a0a0;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --modal-bg: #1e1e1e;
       --accent: #10b981;
       
       /* Dynamic Player Bar Variables */
       --pb-bg: rgba(24, 24, 24, 0.95);
       --pb-text: #ffffff;
+    }
+
+    /* Light Theme Overrides */
+    [data-theme="light"] {
+      --bg: #f5f5f7;
+      --text: #1d1d1f;
+      --text-muted: #86868b;
+      --border-color: rgba(0, 0, 0, 0.1);
+      --modal-bg: #ffffff;
     }
 
     body {
@@ -29,11 +41,40 @@
       background-color: var(--bg);
       color: var(--text);
       display: flex;
-      justify-content: center;
-      padding: 3rem 2rem 120px 2rem; 
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 2rem 120px 2rem; 
       user-select: none;
       min-height: 100vh;
       box-sizing: border-box;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    /* Top Bar & Theme Toggle */
+    .top-bar {
+      width: 100%;
+      max-width: 850px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .app-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .theme-toggle {
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .theme-toggle:hover {
+      opacity: 1;
+      transform: scale(1.1);
     }
 
     .grid {
@@ -59,7 +100,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.08); 
+      border: 1px solid var(--border-color); 
       position: relative;
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       opacity: 0;
@@ -80,7 +121,7 @@
     /* Add Custom Station Button */
     .card.add-btn {
       background: transparent !important;
-      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border: 2px dashed var(--border-color);
       color: var(--text-muted);
     }
     .card.add-btn:hover { border-color: var(--text); color: var(--text); }
@@ -116,6 +157,18 @@
     }
     .favorite-btn:hover { opacity: 1; transform: scale(1.1); }
     .favorite-btn.active { opacity: 1; color: #ff4b2b; }
+
+    /* Edit Button for Custom Stations */
+    .edit-btn {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      opacity: 0.4;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .edit-btn:hover { opacity: 1; transform: scale(1.1); }
 
     /* Dynamic Player Bar */
     .player-bar {
@@ -194,23 +247,30 @@
     }
     .modal-overlay.active { display: flex; opacity: 1; }
     .modal {
-      background: #1e1e1e; padding: 2rem; border-radius: 16px; width: 90%; max-width: 400px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      background: var(--modal-bg); color: var(--text); padding: 2rem; border-radius: 16px; width: 90%; max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid var(--border-color);
     }
     .modal h2 { margin-top: 0; font-size: 1.2rem; margin-bottom: 1.5rem; }
     .modal label { display: block; font-size: 0.8rem; margin-bottom: 0.3rem; color: var(--text-muted); }
     .modal input { 
       width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 8px; 
-      border: 1px solid rgba(255,255,255,0.2); background: #121212; color: white; box-sizing: border-box;
+      border: 1px solid var(--border-color); background: var(--bg); color: var(--text); box-sizing: border-box;
     }
     .modal input[type="color"] { padding: 0; height: 40px; cursor: pointer; }
     .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
     .modal-actions button { padding: 0.6rem 1.2rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-    .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3) !important; }
-    .btn-save { background: white; color: black; }
+    
+    .btn-cancel { background: transparent; color: var(--text); border: 1px solid var(--border-color) !important; }
+    .btn-save { background: var(--text); color: var(--bg); }
+    .btn-delete { background: #ff3b30; color: white; margin-right: auto; }
   </style>
 </head>
 <body>
+
+  <div class="top-bar">
+    <div class="app-title">Frequency</div>
+    <i class="fa-solid fa-moon theme-toggle" id="theme-icon" onclick="toggleTheme()" tabindex="0" title="Toggle Theme"></i>
+  </div>
 
   <div class="grid" id="grid"></div>
 
@@ -245,7 +305,7 @@
 
   <div class="modal-overlay" id="add-modal">
     <div class="modal">
-      <h2>Add Custom Station</h2>
+      <h2 id="modal-title">Add Custom Station</h2>
       <label>Station Name</label>
       <input type="text" id="cs-name" placeholder="e.g. My Awesome Radio">
       
@@ -259,8 +319,9 @@
       <input type="color" id="cs-color" value="#ffffff">
       
       <div class="modal-actions">
+        <button class="btn-delete" id="btn-delete" style="display: none;" onclick="deleteCustomStation()">Delete</button>
         <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
-        <button class="btn-save" onclick="saveCustomStation()">Save Station</button>
+        <button class="btn-save" id="btn-save" onclick="saveCustomStation()">Save</button>
       </div>
     </div>
   </div>
@@ -271,6 +332,29 @@
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed: ', err));
       });
     }
+
+    // --- Theme Logic ---
+    function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById('theme-icon');
+        if (html.getAttribute('data-theme') === 'dark') {
+            html.setAttribute('data-theme', 'light');
+            icon.className = 'fa-solid fa-sun theme-toggle';
+            localStorage.setItem('freq_theme', 'light');
+        } else {
+            html.setAttribute('data-theme', 'dark');
+            icon.className = 'fa-solid fa-moon theme-toggle';
+            localStorage.setItem('freq_theme', 'dark');
+        }
+    }
+
+    const savedTheme = localStorage.getItem('freq_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    window.addEventListener('DOMContentLoaded', () => {
+        const icon = document.getElementById('theme-icon');
+        if(icon) icon.className = savedTheme === 'light' ? 'fa-solid fa-sun theme-toggle' : 'fa-solid fa-moon theme-toggle';
+    });
+    // -------------------
 
     const defaultStations = [
       {id:"stubru",name:"Studio Brussel",streamUrl:"https://icecast.vrtcdn.be/stubru-high.mp3",logo:"stubru.jpg",bgColor:"#ffffff"},
@@ -291,8 +375,8 @@
     let prevVolume = 1;
     let favorites = JSON.parse(localStorage.getItem('freq_favorites')) || [];
     let customStations = JSON.parse(localStorage.getItem('freq_custom_stations')) || [];
+    let editingStationId = null; // Tracks if we are editing an existing station
 
-    // Timer logic
     const timerCycles = [0, 15, 30, 60]; 
     let currentTimerCycleIndex = 0;
     let sleepTimeRemaining = 0;
@@ -350,6 +434,7 @@
       sortedStations.forEach((station, index) => {
         const textColor = getContrastColor(station.bgColor);
         const isFav = favorites.includes(station.id);
+        const isCustom = station.id.startsWith('custom_');
         
         const card = document.createElement('div');
         card.className = 'card';
@@ -357,7 +442,9 @@
         card.tabIndex = 0; 
         
         card.style.animationDelay = `${index * 0.05}s`;
-        card.style.backgroundColor = station.bgColor || '#1e1e1e';
+        
+        // Retains the exact logo background color regardless of Light/Dark theme!
+        card.style.backgroundColor = station.bgColor || 'var(--modal-bg)';
         card.style.color = textColor;
 
         if (activeStation && activeStation.id === station.id) {
@@ -372,13 +459,17 @@
         };
 
         const heartClass = isFav ? 'fa-solid active' : 'fa-regular';
-        // Use a generic icon if logo fails to load or isn't provided
+        
+        // Show edit button only for custom stations
+        const editHtml = isCustom ? `<i class="fa-solid fa-pen edit-btn" onclick="openEditModal(event, '${station.id}')" tabindex="0"></i>` : '';
+
         const logoHTML = station.logo 
             ? `<img src="${station.logo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                <i class="fa-solid fa-radio" style="display:none; font-size: 2rem; margin-bottom: 0.8rem; color: ${textColor}; opacity: 0.5;"></i>`
             : `<i class="fa-solid fa-radio" style="font-size: 2rem; margin-bottom: 0.8rem; color: ${textColor}; opacity: 0.5;"></i>`;
 
         card.innerHTML = `
+          ${editHtml}
           <i class="${heartClass} fa-heart favorite-btn" 
              onclick="toggleFavorite(event, '${station.id}')" tabindex="0"></i>
           ${logoHTML}
@@ -447,7 +538,6 @@
             logoImg.style.display = 'none';
         }
 
-        // DYNAMIC COLOR TRANSFORMATION (RESTORED)
         const textColor = getContrastColor(station.bgColor);
         const glassBg = hexToRgba(station.bgColor || '#181818', 0.95);
         
@@ -556,15 +646,43 @@
       }
     }
 
-    // Modal Logic
-    function openAddModal() { document.getElementById('add-modal').classList.add('active'); }
-    function closeAddModal() { 
-        document.getElementById('add-modal').classList.remove('active'); 
-        // Clear inputs
+    // --- Modal Logic (Add/Edit/Remove Custom Stations) ---
+    
+    function openAddModal() { 
+        editingStationId = null;
+        document.getElementById('modal-title').innerText = "Add Custom Station";
+        document.getElementById('btn-save').innerText = "Save";
+        document.getElementById('btn-delete').style.display = 'none';
+        
         document.getElementById('cs-name').value = '';
         document.getElementById('cs-url').value = '';
         document.getElementById('cs-logo').value = '';
         document.getElementById('cs-color').value = '#ffffff';
+
+        document.getElementById('add-modal').classList.add('active'); 
+    }
+
+    function openEditModal(e, id) {
+        e.stopPropagation(); // Prevents station from playing when clicking the pencil
+        
+        const station = customStations.find(s => s.id === id);
+        if (!station) return;
+
+        editingStationId = id;
+        document.getElementById('modal-title').innerText = "Edit Station";
+        document.getElementById('btn-save').innerText = "Update";
+        document.getElementById('btn-delete').style.display = 'block';
+
+        document.getElementById('cs-name').value = station.name;
+        document.getElementById('cs-url').value = station.streamUrl;
+        document.getElementById('cs-logo').value = station.logo || '';
+        document.getElementById('cs-color').value = station.bgColor || '#ffffff';
+
+        document.getElementById('add-modal').classList.add('active'); 
+    }
+
+    function closeAddModal() { 
+        document.getElementById('add-modal').classList.remove('active'); 
     }
     
     function saveCustomStation() {
@@ -575,19 +693,58 @@
 
         if(!name || !url) return alert('Station Name and Stream URL are required!');
 
-        const newStation = {
-            id: 'custom_' + Date.now(),
-            name: name,
-            streamUrl: url,
-            logo: logo || null,
-            bgColor: color
-        };
+        if (editingStationId) {
+            // Update existing
+            const index = customStations.findIndex(s => s.id === editingStationId);
+            if (index > -1) {
+                customStations[index].name = name;
+                customStations[index].streamUrl = url;
+                customStations[index].logo = logo || null;
+                customStations[index].bgColor = color;
+                
+                // Live update player if we are currently listening to it
+                if (activeStation && activeStation.id === editingStationId) {
+                    selectStation(customStations[index]); 
+                }
+            }
+        } else {
+            // Create new
+            const newStation = {
+                id: 'custom_' + Date.now(),
+                name: name,
+                streamUrl: url,
+                logo: logo || null,
+                bgColor: color
+            };
+            customStations.push(newStation);
+        }
 
-        customStations.push(newStation);
         localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
-        
         closeAddModal();
-        initGrid(); // Refresh to show new station
+        initGrid(); 
+    }
+
+    function deleteCustomStation() {
+        if (!editingStationId) return;
+        
+        if (confirm("Are you sure you want to delete this custom station?")) {
+            customStations = customStations.filter(s => s.id !== editingStationId);
+            localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
+            
+            // Clean up favorites
+            favorites = favorites.filter(id => id !== editingStationId);
+            localStorage.setItem('freq_favorites', JSON.stringify(favorites));
+
+            // If we are currently playing the deleted station, stop it
+            if (activeStation && activeStation.id === editingStationId) {
+                audio.pause();
+                document.getElementById('player-bar').classList.remove('active');
+                activeStation = null;
+            }
+
+            closeAddModal();
+            initGrid();
+        }
     }
 
     initGrid();
