@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -13,14 +13,25 @@
 
   <style>
     :root {
+      /* Dark Theme (Default) */
       --bg: #121212;
       --text: #ffffff;
       --text-muted: #a0a0a0;
-      --accent: #10b981;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-bg: transparent;
       
       /* Dynamic Player Bar Variables */
       --pb-bg: rgba(24, 24, 24, 0.95);
       --pb-text: #ffffff;
+    }
+
+    /* Light Theme Overrides */
+    [data-theme="light"] {
+      --bg: #f5f5f7;
+      --text: #1d1d1f;
+      --text-muted: #86868b;
+      --card-border: rgba(0, 0, 0, 0.1);
+      --card-bg: #ffffff;
     }
 
     body {
@@ -29,12 +40,37 @@
       background-color: var(--bg);
       color: var(--text);
       display: flex;
-      justify-content: center;
-      padding: 3rem 2rem 120px 2rem; 
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 2rem 120px 2rem; 
       user-select: none;
       min-height: 100vh;
       box-sizing: border-box;
+      transition: background-color 0.4s ease, color 0.4s ease;
     }
+
+    .top-bar {
+      width: 100%;
+      max-width: 850px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .app-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .theme-toggle {
+      font-size: 1.2rem;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: 0.2s;
+    }
+    .theme-toggle:hover { opacity: 1; transform: scale(1.1); }
 
     .grid {
       display: grid;
@@ -59,11 +95,12 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.08); 
+      border: 1px solid var(--card-border); 
       position: relative;
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       opacity: 0;
       animation: fadeUpBounce 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      background-color: var(--card-bg);
     }
 
     .card:hover, .card:focus-visible {
@@ -170,6 +207,13 @@
     .play-btn:active { transform: scale(0.95); }
 
     .tools { display: flex; align-items: center; justify-content: flex-end; width: 30%; gap: 1.5rem; color: var(--pb-text); opacity: 0.9;}
+    
+    /* Recorder Styling */
+    .record-btn { cursor: pointer; transition: opacity 0.2s; font-size: 1.1rem; }
+    .record-btn:hover { opacity: 0.7; }
+    .record-btn.recording { color: #ff3b30; animation: pulse 1s infinite; opacity: 1;}
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
     .timer-container, .volume-icon { cursor: pointer; transition: opacity 0.2s; }
     .timer-container:hover, .volume-icon:hover { opacity: 0.7; }
     .timer-container { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; }
@@ -194,23 +238,28 @@
     }
     .modal-overlay.active { display: flex; opacity: 1; }
     .modal {
-      background: #1e1e1e; padding: 2rem; border-radius: 16px; width: 90%; max-width: 400px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+      background: var(--bg); color: var(--text); padding: 2rem; border-radius: 16px; width: 90%; max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid var(--card-border);
     }
     .modal h2 { margin-top: 0; font-size: 1.2rem; margin-bottom: 1.5rem; }
     .modal label { display: block; font-size: 0.8rem; margin-bottom: 0.3rem; color: var(--text-muted); }
     .modal input { 
       width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 8px; 
-      border: 1px solid rgba(255,255,255,0.2); background: #121212; color: white; box-sizing: border-box;
+      border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text); box-sizing: border-box;
     }
     .modal input[type="color"] { padding: 0; height: 40px; cursor: pointer; }
     .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
     .modal-actions button { padding: 0.6rem 1.2rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-    .btn-cancel { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3) !important; }
-    .btn-save { background: white; color: black; }
+    .btn-cancel { background: transparent; color: var(--text); border: 1px solid var(--card-border) !important; }
+    .btn-save { background: var(--text); color: var(--bg); }
   </style>
 </head>
 <body>
+
+  <div class="top-bar">
+    <div class="app-title">Frequency</div>
+    <i class="fa-solid fa-moon theme-toggle" id="theme-icon" onclick="toggleTheme()" tabindex="0" title="Toggle Theme"></i>
+  </div>
 
   <div class="grid" id="grid"></div>
 
@@ -232,6 +281,8 @@
     </div>
     
     <div class="tools">
+      <i class="fa-solid fa-circle-dot record-btn" id="record-btn" onclick="toggleRecord()" title="Record Station" tabindex="0"></i>
+      
       <div class="timer-container" id="timer-btn" onclick="cycleTimer()" tabindex="0">
         <i class="fa-solid fa-moon"></i>
         <span class="timer-text" id="timer-text"></span>
@@ -287,10 +338,39 @@
     ];
 
     const audio = new Audio();
+    audio.crossOrigin = "anonymous"; // Required to attempt recording
     let activeStation = null;
     let prevVolume = 1;
     let favorites = JSON.parse(localStorage.getItem('freq_favorites')) || [];
     let customStations = JSON.parse(localStorage.getItem('freq_custom_stations')) || [];
+
+    // Haptics Helper
+    function triggerHaptic() {
+        if (navigator.vibrate) navigator.vibrate(40);
+    }
+
+    // Theme Management
+    function toggleTheme() {
+        triggerHaptic();
+        const html = document.documentElement;
+        const icon = document.getElementById('theme-icon');
+        if (html.getAttribute('data-theme') === 'dark') {
+            html.setAttribute('data-theme', 'light');
+            icon.className = 'fa-solid fa-sun theme-toggle';
+            localStorage.setItem('freq_theme', 'light');
+        } else {
+            html.setAttribute('data-theme', 'dark');
+            icon.className = 'fa-solid fa-moon theme-toggle';
+            localStorage.setItem('freq_theme', 'dark');
+        }
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('freq_theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-icon').className = savedTheme === 'light' ? 'fa-solid fa-sun theme-toggle' : 'fa-solid fa-moon theme-toggle';
+    }
 
     // Timer logic
     const timerCycles = [0, 15, 30, 60]; 
@@ -357,8 +437,12 @@
         card.tabIndex = 0; 
         
         card.style.animationDelay = `${index * 0.05}s`;
-        card.style.backgroundColor = station.bgColor || '#1e1e1e';
-        card.style.color = textColor;
+        
+        // Use background color if custom, otherwise rely on theme variables
+        if (station.bgColor && station.bgColor !== '#ffffff') {
+             card.style.backgroundColor = station.bgColor;
+             card.style.color = textColor;
+        }
 
         if (activeStation && activeStation.id === station.id) {
           card.classList.add('playing');
@@ -366,17 +450,16 @@
           card.style.boxShadow = `0 0 0 4px var(--bg), 0 0 0 8px ${glowColor}, 0 15px 30px rgba(0,0,0,0.5)`;
         }
 
-        card.onclick = () => selectStation(station);
+        card.onclick = () => { triggerHaptic(); selectStation(station); };
         card.onkeydown = (e) => {
             if (e.key === 'Enter') { e.preventDefault(); selectStation(station); }
         };
 
         const heartClass = isFav ? 'fa-solid active' : 'fa-regular';
-        // Use a generic icon if logo fails to load or isn't provided
         const logoHTML = station.logo 
             ? `<img src="${station.logo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-               <i class="fa-solid fa-radio" style="display:none; font-size: 2rem; margin-bottom: 0.8rem; color: ${textColor}; opacity: 0.5;"></i>`
-            : `<i class="fa-solid fa-radio" style="font-size: 2rem; margin-bottom: 0.8rem; color: ${textColor}; opacity: 0.5;"></i>`;
+               <i class="fa-solid fa-radio" style="display:none; font-size: 2rem; margin-bottom: 0.8rem; opacity: 0.5;"></i>`
+            : `<i class="fa-solid fa-radio" style="font-size: 2rem; margin-bottom: 0.8rem; opacity: 0.5;"></i>`;
 
         card.innerHTML = `
           <i class="${heartClass} fa-heart favorite-btn" 
@@ -387,11 +470,10 @@
         grid.appendChild(card);
       });
 
-      // Append "Add Custom Station" Button
       const addBtn = document.createElement('div');
       addBtn.className = 'card add-btn';
       addBtn.tabIndex = 0;
-      addBtn.onclick = openAddModal;
+      addBtn.onclick = () => { triggerHaptic(); openAddModal(); };
       addBtn.onkeydown = (e) => { if (e.key === 'Enter') openAddModal(); };
       addBtn.innerHTML = `
         <i class="fa-solid fa-plus"></i>
@@ -402,6 +484,7 @@
 
     function toggleFavorite(e, id) {
         e.stopPropagation(); 
+        triggerHaptic();
         if (favorites.includes(id)) favorites = favorites.filter(favId => favId !== id);
         else favorites.push(id);
         
@@ -434,6 +517,9 @@
         audio.src = station.streamUrl;
         audio.play();
         
+        // Stop recorder if active
+        if(mediaRecorder && mediaRecorder.state === "recording") toggleRecord();
+        
         document.title = `${station.name} | Frequency`;
         
         document.getElementById('player-bar').classList.add('active');
@@ -447,7 +533,6 @@
             logoImg.style.display = 'none';
         }
 
-        // DYNAMIC COLOR TRANSFORMATION (RESTORED)
         const textColor = getContrastColor(station.bgColor);
         const glassBg = hexToRgba(station.bgColor || '#181818', 0.95);
         
@@ -468,6 +553,7 @@
     }
 
     function togglePlayPause() {
+      triggerHaptic();
       if (!activeStation) return;
       if (audio.paused) audio.play();
       else audio.pause();
@@ -487,6 +573,7 @@
     }
 
     function toggleMute() {
+      triggerHaptic();
       const slider = document.getElementById('volume-slider');
       if (audio.muted || audio.volume === 0) {
         audio.muted = false;
@@ -508,9 +595,13 @@
     }
 
     function cycleTimer() {
+      triggerHaptic();
       currentTimerCycleIndex = (currentTimerCycleIndex + 1) % timerCycles.length;
       const minutes = timerCycles[currentTimerCycleIndex];
       clearInterval(timerInterval);
+      audio.volume = 1; // Reset volume
+      document.getElementById('volume-slider').value = 1;
+      
       const timerText = document.getElementById('timer-text');
 
       if (minutes === 0) timerText.innerText = '';
@@ -519,12 +610,23 @@
         updateTimerDisplay();
         timerInterval = setInterval(() => {
           sleepTimeRemaining--;
-          updateTimerDisplay();
+          
+          // Smart Fade-out: Lower volume slowly in the last 30 seconds
+          if (sleepTimeRemaining <= 30 && sleepTimeRemaining > 0) {
+              const newVol = Math.max(0, sleepTimeRemaining / 30);
+              audio.volume = newVol;
+              document.getElementById('volume-slider').value = newVol;
+          }
+
           if (sleepTimeRemaining <= 0) {
             clearInterval(timerInterval);
             audio.pause();
+            audio.volume = 1; 
+            document.getElementById('volume-slider').value = 1;
             currentTimerCycleIndex = 0;
             timerText.innerText = '';
+          } else {
+              updateTimerDisplay();
           }
         }, 1000);
       }
@@ -556,11 +658,50 @@
       }
     }
 
+    // --- Recording Engine ---
+    let mediaRecorder;
+    let recordedChunks = [];
+    
+    function toggleRecord() {
+        triggerHaptic();
+        const btn = document.getElementById('record-btn');
+        
+        if(mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+            btn.classList.remove('recording');
+            return;
+        }
+
+        try {
+            const stream = audio.captureStream ? audio.captureStream() : audio.mozCaptureStream ? audio.mozCaptureStream() : null;
+            if(!stream) throw new Error("CaptureStream not supported");
+
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none'; 
+                a.href = url; 
+                a.download = `${activeStation.name.replace(/\s+/g, '_')}_Record_${Date.now()}.webm`;
+                document.body.appendChild(a); 
+                a.click(); 
+                window.URL.revokeObjectURL(url);
+                recordedChunks = [];
+            };
+            
+            mediaRecorder.start();
+            btn.classList.add('recording');
+        } catch (err) {
+            alert("Recording blocked. The radio station's server security (CORS) prevents browser recording for this stream.");
+        }
+    }
+
     // Modal Logic
     function openAddModal() { document.getElementById('add-modal').classList.add('active'); }
     function closeAddModal() { 
         document.getElementById('add-modal').classList.remove('active'); 
-        // Clear inputs
         document.getElementById('cs-name').value = '';
         document.getElementById('cs-url').value = '';
         document.getElementById('cs-logo').value = '';
@@ -587,7 +728,7 @@
         localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
         
         closeAddModal();
-        initGrid(); // Refresh to show new station
+        initGrid(); 
     }
 
     initGrid();
