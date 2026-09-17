@@ -77,6 +77,54 @@
       transform: scale(1.1);
     }
 
+    .toolbar {
+      width: 100%;
+      max-width: 850px;
+      display: flex;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .search-input {
+      flex: 1;
+      border: 1px solid var(--border-color);
+      background: var(--modal-bg);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.9rem;
+    }
+    .shuffle-btn {
+      border: 1px solid var(--border-color);
+      background: var(--modal-bg);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 0.7rem 0.9rem;
+      cursor: pointer;
+    }
+
+    .recent-wrap {
+      width: 100%;
+      max-width: 850px;
+      margin-bottom: 1rem;
+      display: none;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .recent-wrap.active { display: flex; }
+    .recent-chip {
+      border: 1px solid var(--border-color);
+      background: var(--modal-bg);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 0.45rem 0.7rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      max-width: 180px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -272,6 +320,13 @@
     <i class="fa-solid fa-moon theme-toggle" id="theme-icon" onclick="toggleTheme()" tabindex="0" title="Toggle Theme"></i>
   </div>
 
+  <div class="toolbar">
+    <input id="station-search" class="search-input" type="search" placeholder="Search stations..." oninput="handleSearchInput(this.value)">
+    <button class="shuffle-btn" onclick="playRandomStation()" title="Play random station"><i class="fa-solid fa-shuffle"></i></button>
+  </div>
+
+  <div class="recent-wrap" id="recent-wrap"></div>
+
   <div class="grid" id="grid"></div>
 
   <div class="player-bar" id="player-bar">
@@ -314,10 +369,7 @@
       
       <label>Logo Image URL (optional)</label>
       <input type="url" id="cs-logo" placeholder="https://.../logo.png">
-      
-      <label>Brand Background Color</label>
-      <input type="color" id="cs-color" value="#ffffff">
-      
+
       <div class="modal-actions">
         <button class="btn-delete" id="btn-delete" style="display: none;" onclick="deleteCustomStation()">Delete</button>
         <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
@@ -367,7 +419,11 @@
       {id:"npo1",name:"NPO Radio 1",streamUrl:"https://icecast.omroep.nl/radio1-bb-aac",logo:"npo1.png",bgColor:"#1953ff"},
       {id:"qmusic",name:"Qmusic",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/qmusic.mp3",logo:"qmusic.png",bgColor:"#ffffff"},
       {id:"joe",name:"JOE",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/joe_fm/mp3",logo:"joe.png",bgColor:"#1a52b3"},
-      {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",logo:"willy.png",bgColor:"#000000"}
+      {id:"willy",name:"Willy",streamUrl:"https://icecast-qmusicbe-cdp.triple-it.nl/willy.mp3",logo:"willy.png",bgColor:"#000000"},
+      {id:"willyclassx",name:"Willy Class X",streamUrl:"https://streams.radio.dpgmedia.cloud/redirect/willy_be_class_x/mp3",logo:"willyclassx.png"},
+      {id:"radio2",name:"Radio 2",streamUrl:"https://icecast.vrtcdn.be/ra2wvl-high.mp3",logo:"radio2.png"},
+      {id:"klara",name:"Klara",streamUrl:"https://icecast.vrtcdn.be/klara-high.mp3",logo:"klara.png"},
+      {id:"nostalgie",name:"Nostalgie",streamUrl:"https://playerservices.streamtheworld.com/api/livestream-redirect/NOSTALGIEWHATAFEELING.mp3",logo:"nostalgie.png"}
     ];
 
     const audio = new Audio();
@@ -375,9 +431,13 @@
     let prevVolume = 1;
     let favorites = JSON.parse(localStorage.getItem('freq_favorites')) || [];
     let customStations = JSON.parse(localStorage.getItem('freq_custom_stations')) || [];
+    let recentStations = JSON.parse(localStorage.getItem('freq_recent_stations')) || [];
+    let stationColorCache = JSON.parse(localStorage.getItem('freq_station_colors')) || {};
+    let currentSearchTerm = '';
     let editingStationId = null; // Tracks if we are editing an existing station
 
     const timerCycles = [0, 15, 30, 60]; 
+    const recentLimit = 5;
     let currentTimerCycleIndex = 0;
     let sleepTimeRemaining = 0;
     let timerInterval = null;
@@ -426,13 +486,141 @@
       });
     }
 
+    function hashToColor(name) {
+      const source = name || 'station';
+      let hash = 0;
+      for (let i = 0; i < source.length; i++) hash = source.charCodeAt(i) + ((hash << 5) - hash);
+      const hue = Math.abs(hash % 360);
+      return `hsl(${hue}, 55%, 42%)`;
+    }
+
+    function rgbToHex(r, g, b) {
+      const toHex = (value) => value.toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    function getStationById(id) {
+      return getAllStations().find(station => station.id === id);
+    }
+
+    function getStationBgColor(station) {
+      if (stationColorCache[station.id]) return stationColorCache[station.id];
+      if (station.bgColor) return station.bgColor;
+      return hashToColor(station.name);
+    }
+
+    function applyPlayerTheme(station) {
+      const stationColor = getStationBgColor(station);
+      const textColor = getContrastColor(stationColor);
+      const glassBg = hexToRgba(stationColor || '#181818', 0.95);
+      document.documentElement.style.setProperty('--pb-bg', glassBg);
+      document.documentElement.style.setProperty('--pb-text', textColor);
+    }
+
+    function updateStationCardColor(stationId, color) {
+      stationColorCache[stationId] = color;
+      localStorage.setItem('freq_station_colors', JSON.stringify(stationColorCache));
+      const station = getStationById(stationId);
+      if (!station) return;
+      const card = document.getElementById(`card-${stationId}`);
+      if (card) {
+        const textColor = getContrastColor(color);
+        card.style.backgroundColor = color;
+        card.style.color = textColor;
+      }
+      if (activeStation && activeStation.id === stationId) {
+        applyPlayerTheme(station);
+        updateGridStyles(stationId);
+      }
+    }
+
+    function inferColorFromLogo(station) {
+      if (!station.logo || stationColorCache[station.id]) return;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.referrerPolicy = 'no-referrer';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          const sampleSize = 32;
+          canvas.width = sampleSize;
+          canvas.height = sampleSize;
+          ctx.drawImage(img, 0, 0, sampleSize, sampleSize);
+          const data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
+          let r = 0, g = 0, b = 0, count = 0;
+          for (let i = 0; i < data.length; i += 16) {
+            const alpha = data[i + 3];
+            if (alpha < 128) continue;
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+            count++;
+          }
+          if (!count) return;
+          const color = rgbToHex(Math.round(r / count), Math.round(g / count), Math.round(b / count));
+          updateStationCardColor(station.id, color);
+        } catch (err) {
+          updateStationCardColor(station.id, hashToColor(station.name));
+        }
+      };
+      img.onerror = () => updateStationCardColor(station.id, hashToColor(station.name));
+      img.src = station.logo;
+    }
+
+    function addRecentStation(stationId) {
+      recentStations = recentStations.filter(id => id !== stationId);
+      recentStations.unshift(stationId);
+      recentStations = recentStations.slice(0, recentLimit);
+      localStorage.setItem('freq_recent_stations', JSON.stringify(recentStations));
+      renderRecentStations();
+    }
+
+    function renderRecentStations() {
+      const wrap = document.getElementById('recent-wrap');
+      wrap.innerHTML = '';
+      const validRecent = recentStations
+        .map(id => getStationById(id))
+        .filter(Boolean);
+      if (!validRecent.length) {
+        wrap.classList.remove('active');
+        return;
+      }
+      wrap.classList.add('active');
+      validRecent.forEach(station => {
+        const chip = document.createElement('button');
+        chip.className = 'recent-chip';
+        chip.title = `Play ${station.name}`;
+        chip.innerText = station.name;
+        chip.onclick = () => selectStation(station);
+        wrap.appendChild(chip);
+      });
+    }
+
+    function handleSearchInput(value) {
+      currentSearchTerm = value.trim().toLowerCase();
+      initGrid();
+    }
+
+    function playRandomStation() {
+      const stations = getAllStations();
+      if (!stations.length) return;
+      const pool = activeStation ? stations.filter(st => st.id !== activeStation.id) : stations;
+      const selected = pool[Math.floor(Math.random() * pool.length)];
+      selectStation(selected || stations[0]);
+    }
+
     function initGrid() {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
-      const sortedStations = getSortedStations();
+      const sortedStations = getSortedStations().filter(station =>
+        !currentSearchTerm || station.name.toLowerCase().includes(currentSearchTerm)
+      );
 
       sortedStations.forEach((station, index) => {
-        const textColor = getContrastColor(station.bgColor);
+        const stationColor = getStationBgColor(station);
+        const textColor = getContrastColor(stationColor);
         const isFav = favorites.includes(station.id);
         const isCustom = station.id.startsWith('custom_');
         
@@ -444,12 +632,12 @@
         card.style.animationDelay = `${index * 0.05}s`;
         
         // Retains the exact logo background color regardless of Light/Dark theme!
-        card.style.backgroundColor = station.bgColor || 'var(--modal-bg)';
+        card.style.backgroundColor = stationColor || 'var(--modal-bg)';
         card.style.color = textColor;
 
         if (activeStation && activeStation.id === station.id) {
           card.classList.add('playing');
-          const glowColor = station.bgColor === '#000000' ? '#555555' : station.bgColor;
+          const glowColor = stationColor === '#000000' ? '#555555' : stationColor;
           card.style.boxShadow = `0 0 0 4px var(--bg), 0 0 0 8px ${glowColor}, 0 15px 30px rgba(0,0,0,0.5)`;
         }
 
@@ -476,6 +664,7 @@
           <div class="name">${station.name}</div>
         `;
         grid.appendChild(card);
+        inferColorFromLogo(station);
       });
 
       // Append "Add Custom Station" Button
@@ -489,6 +678,7 @@
         <div class="name">Add Custom</div>
       `;
       grid.appendChild(addBtn);
+      renderRecentStations();
     }
 
     function toggleFavorite(e, id) {
@@ -524,6 +714,7 @@
         activeStation = station;
         audio.src = station.streamUrl;
         audio.play();
+        addRecentStation(station.id);
         
         document.title = `${station.name} | Frequency`;
         
@@ -538,11 +729,7 @@
             logoImg.style.display = 'none';
         }
 
-        const textColor = getContrastColor(station.bgColor);
-        const glassBg = hexToRgba(station.bgColor || '#181818', 0.95);
-        
-        document.documentElement.style.setProperty('--pb-bg', glassBg);
-        document.documentElement.style.setProperty('--pb-text', textColor);
+        applyPlayerTheme(station);
 
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata({
@@ -657,7 +844,6 @@
         document.getElementById('cs-name').value = '';
         document.getElementById('cs-url').value = '';
         document.getElementById('cs-logo').value = '';
-        document.getElementById('cs-color').value = '#ffffff';
 
         document.getElementById('add-modal').classList.add('active'); 
     }
@@ -676,7 +862,6 @@
         document.getElementById('cs-name').value = station.name;
         document.getElementById('cs-url').value = station.streamUrl;
         document.getElementById('cs-logo').value = station.logo || '';
-        document.getElementById('cs-color').value = station.bgColor || '#ffffff';
 
         document.getElementById('add-modal').classList.add('active'); 
     }
@@ -689,7 +874,6 @@
         const name = document.getElementById('cs-name').value.trim();
         const url = document.getElementById('cs-url').value.trim();
         const logo = document.getElementById('cs-logo').value.trim();
-        const color = document.getElementById('cs-color').value;
 
         if(!name || !url) return alert('Station Name and Stream URL are required!');
 
@@ -700,7 +884,7 @@
                 customStations[index].name = name;
                 customStations[index].streamUrl = url;
                 customStations[index].logo = logo || null;
-                customStations[index].bgColor = color;
+                delete stationColorCache[editingStationId];
                 
                 // Live update player if we are currently listening to it
                 if (activeStation && activeStation.id === editingStationId) {
@@ -713,13 +897,13 @@
                 id: 'custom_' + Date.now(),
                 name: name,
                 streamUrl: url,
-                logo: logo || null,
-                bgColor: color
+                logo: logo || null
             };
             customStations.push(newStation);
         }
 
         localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
+        localStorage.setItem('freq_station_colors', JSON.stringify(stationColorCache));
         closeAddModal();
         initGrid(); 
     }
@@ -730,10 +914,14 @@
         if (confirm("Are you sure you want to delete this custom station?")) {
             customStations = customStations.filter(s => s.id !== editingStationId);
             localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
+            delete stationColorCache[editingStationId];
+            localStorage.setItem('freq_station_colors', JSON.stringify(stationColorCache));
             
             // Clean up favorites
             favorites = favorites.filter(id => id !== editingStationId);
             localStorage.setItem('freq_favorites', JSON.stringify(favorites));
+            recentStations = recentStations.filter(id => id !== editingStationId);
+            localStorage.setItem('freq_recent_stations', JSON.stringify(recentStations));
 
             // If we are currently playing the deleted station, stop it
             if (activeStation && activeStation.id === editingStationId) {
