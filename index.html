@@ -305,6 +305,46 @@
       border: 1px solid var(--border-color); background: var(--bg); color: var(--text); box-sizing: border-box;
     }
     .modal input[type="color"] { padding: 0; height: 40px; cursor: pointer; }
+    .modal-option-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      margin: 0 0 1rem;
+      color: var(--text);
+    }
+    .modal-option-row input {
+      width: auto;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+    .modal-preview {
+      margin: 0.25rem 0 0.75rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-height: 52px;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    .modal-preview img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.2);
+      padding: 0.15rem;
+    }
+    .modal-preview .preview-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .modal-actions { display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem; }
     .modal-actions button { padding: 0.6rem 1.2rem; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
     
@@ -362,13 +402,27 @@
     <div class="modal">
       <h2 id="modal-title">Add Custom Station</h2>
       <label>Station Name</label>
-      <input type="text" id="cs-name" placeholder="e.g. My Awesome Radio">
+      <input type="text" id="cs-name" placeholder="e.g. My Awesome Radio" oninput="updateModalPreview()">
       
       <label>Stream URL (mp3/aac)</label>
       <input type="url" id="cs-url" placeholder="https://...">
       
       <label>Logo Image URL (optional)</label>
-      <input type="url" id="cs-logo" placeholder="https://.../logo.png">
+      <input type="url" id="cs-logo" placeholder="https://.../logo.png" oninput="updateModalPreview()">
+
+      <label class="modal-option-row">
+        <input type="checkbox" id="cs-auto-color" checked onchange="handleAutoColorToggle()">
+        Use automatic background from logo/name
+      </label>
+
+      <label>Background Color</label>
+      <input type="color" id="cs-bgcolor" value="#475569" oninput="updateModalPreview()">
+
+      <div class="modal-preview" id="cs-preview-card">
+        <img id="cs-preview-logo" src="" alt="Preview logo" style="display:none;">
+        <i class="fa-solid fa-radio" id="cs-preview-icon"></i>
+        <div class="preview-name" id="cs-preview-name">Custom Station</div>
+      </div>
 
       <div class="modal-actions">
         <button class="btn-delete" id="btn-delete" style="display: none;" onclick="deleteCustomStation()">Delete</button>
@@ -435,6 +489,7 @@
     let stationColorCache = JSON.parse(localStorage.getItem('freq_station_colors')) || {};
     let currentSearchTerm = '';
     let editingStationId = null; // Tracks if we are editing an existing station
+    const defaultCustomColor = '#475569';
 
     const timerCycles = [0, 15, 30, 60]; 
     const recentLimit = 5;
@@ -507,6 +562,14 @@
       if (stationColorCache[station.id]) return stationColorCache[station.id];
       if (station.bgColor) return station.bgColor;
       return hashToColor(station.name);
+    }
+
+    function isHexColor(value) {
+      return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
+    }
+
+    function safePreviewTextColor(backgroundColor) {
+      return isHexColor(backgroundColor) ? getContrastColor(backgroundColor) : '#ffffff';
     }
 
     function applyPlayerTheme(station) {
@@ -844,7 +907,11 @@
         document.getElementById('cs-name').value = '';
         document.getElementById('cs-url').value = '';
         document.getElementById('cs-logo').value = '';
+        document.getElementById('cs-auto-color').checked = true;
+        document.getElementById('cs-bgcolor').value = defaultCustomColor;
 
+        handleAutoColorToggle();
+        updateModalPreview();
         document.getElementById('add-modal').classList.add('active'); 
     }
 
@@ -862,18 +929,60 @@
         document.getElementById('cs-name').value = station.name;
         document.getElementById('cs-url').value = station.streamUrl;
         document.getElementById('cs-logo').value = station.logo || '';
+        const cachedColor = stationColorCache[id];
+        document.getElementById('cs-auto-color').checked = !cachedColor;
+        document.getElementById('cs-bgcolor').value = isHexColor(cachedColor) ? cachedColor : defaultCustomColor;
 
+        handleAutoColorToggle();
+        updateModalPreview();
         document.getElementById('add-modal').classList.add('active'); 
     }
 
     function closeAddModal() { 
         document.getElementById('add-modal').classList.remove('active'); 
     }
+
+    function handleAutoColorToggle() {
+        const isAuto = document.getElementById('cs-auto-color').checked;
+        const colorPicker = document.getElementById('cs-bgcolor');
+        colorPicker.disabled = isAuto;
+        colorPicker.style.opacity = isAuto ? '0.5' : '1';
+        updateModalPreview();
+    }
+
+    function updateModalPreview() {
+        const name = document.getElementById('cs-name').value.trim() || 'Custom Station';
+        const logo = document.getElementById('cs-logo').value.trim();
+        const isAuto = document.getElementById('cs-auto-color').checked;
+        const manualColor = document.getElementById('cs-bgcolor').value || defaultCustomColor;
+        const previewColor = isAuto ? hashToColor(name) : manualColor;
+        const previewTextColor = safePreviewTextColor(previewColor);
+
+        const previewCard = document.getElementById('cs-preview-card');
+        const previewName = document.getElementById('cs-preview-name');
+        const previewLogo = document.getElementById('cs-preview-logo');
+        const previewIcon = document.getElementById('cs-preview-icon');
+
+        previewCard.style.backgroundColor = previewColor;
+        previewCard.style.color = previewTextColor;
+        previewName.innerText = name;
+
+        if (logo) {
+            previewLogo.src = logo;
+            previewLogo.style.display = 'block';
+            previewIcon.style.display = 'none';
+        } else {
+            previewLogo.style.display = 'none';
+            previewIcon.style.display = 'block';
+        }
+    }
     
     function saveCustomStation() {
         const name = document.getElementById('cs-name').value.trim();
         const url = document.getElementById('cs-url').value.trim();
         const logo = document.getElementById('cs-logo').value.trim();
+        const useAutoColor = document.getElementById('cs-auto-color').checked;
+        const chosenColor = document.getElementById('cs-bgcolor').value || defaultCustomColor;
 
         if(!name || !url) return alert('Station Name and Stream URL are required!');
 
@@ -884,7 +993,8 @@
                 customStations[index].name = name;
                 customStations[index].streamUrl = url;
                 customStations[index].logo = logo || null;
-                delete stationColorCache[editingStationId];
+                if (useAutoColor) delete stationColorCache[editingStationId];
+                else stationColorCache[editingStationId] = chosenColor;
                 
                 // Live update player if we are currently listening to it
                 if (activeStation && activeStation.id === editingStationId) {
@@ -900,6 +1010,8 @@
                 logo: logo || null
             };
             customStations.push(newStation);
+            if (useAutoColor) delete stationColorCache[newStation.id];
+            else stationColorCache[newStation.id] = chosenColor;
         }
 
         localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
@@ -934,6 +1046,22 @@
             initGrid();
         }
     }
+
+    document.getElementById('add-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'add-modal') closeAddModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('add-modal');
+      if (!modal.classList.contains('active')) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeAddModal();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        saveCustomStation();
+      }
+    });
 
     initGrid();
   </script>
