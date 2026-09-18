@@ -20,6 +20,9 @@
       --border-color: rgba(255, 255, 255, 0.08);
       --modal-bg: #1e1e1e;
       --accent: #10b981;
+      --card-surface: #1b1b1d;
+      --logo-plate-neutral: rgba(255, 255, 255, 0.08);
+      --logo-plate-border: rgba(255, 255, 255, 0.15);
       
       /* Dynamic Player Bar Variables */
       --pb-bg: rgba(24, 24, 24, 0.95);
@@ -33,6 +36,9 @@
       --text-muted: #86868b;
       --border-color: rgba(0, 0, 0, 0.1);
       --modal-bg: #ffffff;
+      --card-surface: #ffffff;
+      --logo-plate-neutral: rgba(0, 0, 0, 0.06);
+      --logo-plate-border: rgba(0, 0, 0, 0.12);
     }
 
     body {
@@ -93,13 +99,18 @@
       padding: 0.7rem 0.9rem;
       font-size: 0.9rem;
     }
-    .shuffle-btn {
+    .toolbar-btn {
       border: 1px solid var(--border-color);
       background: var(--modal-bg);
       color: var(--text);
       border-radius: 12px;
       padding: 0.7rem 0.9rem;
       cursor: pointer;
+    }
+    .toolbar-btn.active {
+      background: var(--text);
+      color: var(--bg);
+      border-color: transparent;
     }
 
     .recent-wrap {
@@ -153,11 +164,14 @@
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       opacity: 0;
       animation: fadeUpBounce 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      background: var(--card-surface);
+      color: var(--text);
+      --card-logo-plate-bg: var(--logo-plate-neutral);
+      --card-logo-plate-border: var(--logo-plate-border);
     }
 
     .card:hover, .card:focus-visible {
       transform: translateY(-6px) scale(1.03);
-      filter: brightness(1.1);
       outline: none;
     }
 
@@ -175,12 +189,24 @@
     .card.add-btn:hover { border-color: var(--text); color: var(--text); }
     .card.add-btn i { font-size: 2rem; margin-bottom: 0.8rem; }
 
+    .card .logo-plate {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.8rem;
+      background: var(--card-logo-plate-bg);
+      border: 1px solid var(--card-logo-plate-border);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
     /* Seamless Logos */
     .card img {
       width: 44px;
       height: 44px;
       object-fit: contain;
-      margin-bottom: 0.8rem;
       border-radius: 0;
       box-shadow: none;
       filter: none;
@@ -217,6 +243,26 @@
       transition: opacity 0.2s, transform 0.2s;
     }
     .edit-btn:hover { opacity: 1; transform: scale(1.1); }
+
+    .mode-btn {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      border: 1px solid currentColor;
+      background: rgba(0,0,0,0.08);
+      color: inherit;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.55;
+      cursor: pointer;
+      padding: 0;
+    }
+    .mode-btn:hover { opacity: 1; }
 
     /* Dynamic Player Bar */
     .player-bar {
@@ -273,6 +319,22 @@
     .tools { display: flex; align-items: center; justify-content: flex-end; width: 30%; gap: 1.5rem; color: var(--pb-text); opacity: 0.9;}
     .timer-container, .volume-icon { cursor: pointer; transition: opacity 0.2s; }
     .timer-container:hover, .volume-icon:hover { opacity: 0.7; }
+    .tool-icon-btn {
+      border: 1px solid rgba(255,255,255,0.24);
+      background: transparent;
+      color: var(--pb-text);
+      border-radius: 999px;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .tool-icon-btn:hover { opacity: 0.7; transform: scale(1.05); }
+    .tool-icon-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
     .timer-container { display: flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; }
     .timer-text { font-size: 0.85rem; font-variant-numeric: tabular-nums; font-weight: bold; }
     .volume-container { display: flex; align-items: center; gap: 0.8rem; }
@@ -305,6 +367,16 @@
       border: 1px solid var(--border-color); background: var(--bg); color: var(--text); box-sizing: border-box;
     }
     .modal input[type="color"] { padding: 0; height: 40px; cursor: pointer; }
+    .modal select {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg);
+      color: var(--text);
+      box-sizing: border-box;
+    }
     .modal-option-row {
       display: flex;
       align-items: center;
@@ -334,8 +406,18 @@
       height: 30px;
       object-fit: contain;
       border-radius: 4px;
-      background: rgba(255,255,255,0.2);
-      padding: 0.15rem;
+      background: transparent;
+      padding: 0;
+    }
+    .preview-logo-plate {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--logo-plate-neutral);
+      border: 1px solid var(--logo-plate-border);
     }
     .modal-preview .preview-name {
       font-size: 0.85rem;
@@ -362,7 +444,8 @@
 
   <div class="toolbar">
     <input id="station-search" class="search-input" type="search" placeholder="Search stations..." oninput="handleSearchInput(this.value)">
-    <button class="shuffle-btn" onclick="playRandomStation()" title="Play random station"><i class="fa-solid fa-shuffle"></i></button>
+    <button class="toolbar-btn" onclick="playRandomStation()" title="Play random station"><i class="fa-solid fa-shuffle"></i></button>
+    <button class="toolbar-btn" id="favorites-filter-btn" onclick="toggleFavoritesOnly()" title="Show only favorites"><i class="fa-solid fa-heart"></i></button>
   </div>
 
   <div class="recent-wrap" id="recent-wrap"></div>
@@ -387,6 +470,9 @@
     </div>
     
     <div class="tools">
+      <button class="tool-icon-btn" id="copy-url-btn" onclick="copyCurrentStreamUrl()" title="Copy current stream URL" disabled>
+        <i class="fa-solid fa-link"></i>
+      </button>
       <div class="timer-container" id="timer-btn" onclick="cycleTimer()" tabindex="0">
         <i class="fa-solid fa-moon"></i>
         <span class="timer-text" id="timer-text"></span>
@@ -410,6 +496,13 @@
       <label>Logo Image URL (optional)</label>
       <input type="url" id="cs-logo" placeholder="https://.../logo.png" oninput="updateModalPreview()">
 
+      <label>Card Display Mode</label>
+      <select id="cs-display-mode" onchange="updateModalPreview()">
+        <option value="clean">Clean</option>
+        <option value="brand" selected>Brand</option>
+        <option value="full">Full</option>
+      </select>
+
       <label class="modal-option-row">
         <input type="checkbox" id="cs-auto-color" checked onchange="handleAutoColorToggle()">
         Use automatic background from logo/name
@@ -419,8 +512,10 @@
       <input type="color" id="cs-bgcolor" value="#475569" oninput="updateModalPreview()">
 
       <div class="modal-preview" id="cs-preview-card">
-        <img id="cs-preview-logo" src="" alt="Preview logo" style="display:none;">
-        <i class="fa-solid fa-radio" id="cs-preview-icon"></i>
+        <div class="preview-logo-plate" id="cs-preview-plate">
+          <img id="cs-preview-logo" src="" alt="Preview logo" style="display:none;">
+          <i class="fa-solid fa-radio" id="cs-preview-icon"></i>
+        </div>
         <div class="preview-name" id="cs-preview-name">Custom Station</div>
       </div>
 
@@ -459,6 +554,16 @@
     window.addEventListener('DOMContentLoaded', () => {
         const icon = document.getElementById('theme-icon');
         if(icon) icon.className = savedTheme === 'light' ? 'fa-solid fa-sun theme-toggle' : 'fa-solid fa-moon theme-toggle';
+        const volumeSlider = document.getElementById('volume-slider');
+        const savedVolume = parseFloat(localStorage.getItem('freq_volume'));
+        const savedMuted = localStorage.getItem('freq_muted') === 'true';
+        if (!Number.isNaN(savedVolume)) audio.volume = clamp(savedVolume, 0, 1);
+        audio.muted = savedMuted || audio.volume === 0;
+        if (volumeSlider) volumeSlider.value = audio.muted ? 0 : audio.volume;
+        if (audio.volume > 0) prevVolume = audio.volume;
+        updateVolumeIcon();
+        updateFavoritesFilterButton();
+        updateCopyButtonState();
     });
     // -------------------
 
@@ -482,11 +587,14 @@
 
     const audio = new Audio();
     let activeStation = null;
-    let prevVolume = 1;
+    let prevVolume = parseFloat(localStorage.getItem('freq_volume_prev')) || 1;
     let favorites = JSON.parse(localStorage.getItem('freq_favorites')) || [];
     let customStations = JSON.parse(localStorage.getItem('freq_custom_stations')) || [];
     let recentStations = JSON.parse(localStorage.getItem('freq_recent_stations')) || [];
     let stationColorCache = JSON.parse(localStorage.getItem('freq_station_colors')) || {};
+    let stationAccentCache = JSON.parse(localStorage.getItem('freq_station_accents')) || {};
+    let stationDisplayModes = JSON.parse(localStorage.getItem('freq_station_display_modes')) || {};
+    let showFavoritesOnly = localStorage.getItem('freq_show_favorites_only') === 'true';
     let currentSearchTerm = '';
     let editingStationId = null; // Tracks if we are editing an existing station
     const defaultCustomColor = '#475569';
@@ -541,27 +649,116 @@
       });
     }
 
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function rgbToHex(r, g, b) {
+      const toHex = (value) => clamp(Math.round(value), 0, 255).toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    function hexToRgb(hex) {
+      if (!hex || typeof hex !== 'string') return null;
+      let h = hex.trim().replace('#', '');
+      if (h.length === 3) h = h.split('').map(char => char + char).join('');
+      if (!/^[0-9a-f]{6}$/i.test(h)) return null;
+      return {
+        r: parseInt(h.substring(0, 2), 16),
+        g: parseInt(h.substring(2, 4), 16),
+        b: parseInt(h.substring(4, 6), 16)
+      };
+    }
+
+    function rgbToHsl(r, g, b) {
+      const rn = r / 255;
+      const gn = g / 255;
+      const bn = b / 255;
+      const max = Math.max(rn, gn, bn);
+      const min = Math.min(rn, gn, bn);
+      const d = max - min;
+      let h = 0;
+      let s = 0;
+      const l = (max + min) / 2;
+
+      if (d !== 0) {
+        s = d / (1 - Math.abs(2 * l - 1));
+        if (max === rn) h = ((gn - bn) / d) % 6;
+        else if (max === gn) h = (bn - rn) / d + 2;
+        else h = (rn - gn) / d + 4;
+        h *= 60;
+        if (h < 0) h += 360;
+      }
+
+      return { h, s: s * 100, l: l * 100 };
+    }
+
+    function hslToRgb(h, s, l) {
+      const sat = clamp(s, 0, 100) / 100;
+      const light = clamp(l, 0, 100) / 100;
+      const c = (1 - Math.abs(2 * light - 1)) * sat;
+      const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+      const m = light - c / 2;
+      let r = 0, g = 0, b = 0;
+
+      if (h < 60) [r, g, b] = [c, x, 0];
+      else if (h < 120) [r, g, b] = [x, c, 0];
+      else if (h < 180) [r, g, b] = [0, c, x];
+      else if (h < 240) [r, g, b] = [0, x, c];
+      else if (h < 300) [r, g, b] = [x, 0, c];
+      else [r, g, b] = [c, 0, x];
+
+      return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+      };
+    }
+
+    function hslToHex(h, s, l) {
+      const rgb = hslToRgb(h, s, l);
+      return rgbToHex(rgb.r, rgb.g, rgb.b);
+    }
+
+    function clampAccentColor(hexColor) {
+      const rgb = hexToRgb(hexColor);
+      if (!rgb) return null;
+      const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+      return hslToHex(hsl.h, clamp(hsl.s, 45, 78), clamp(hsl.l, 34, 62));
+    }
+
     function hashToColor(name) {
       const source = name || 'station';
       let hash = 0;
       for (let i = 0; i < source.length; i++) hash = source.charCodeAt(i) + ((hash << 5) - hash);
       const hue = Math.abs(hash % 360);
-      return `hsl(${hue}, 55%, 42%)`;
-    }
-
-    function rgbToHex(r, g, b) {
-      const toHex = (value) => value.toString(16).padStart(2, '0');
-      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+      return hslToHex(hue, 62, 46);
     }
 
     function getStationById(id) {
       return getAllStations().find(station => station.id === id);
     }
 
-    function getStationBgColor(station) {
-      if (stationColorCache[station.id]) return stationColorCache[station.id];
-      if (station.bgColor) return station.bgColor;
+    function getStationDisplayMode(stationId) {
+      const mode = stationDisplayModes[stationId];
+      return ['clean', 'brand', 'full'].includes(mode) ? mode : 'brand';
+    }
+
+    function getStationAccentColor(station) {
+      const manualColor = stationColorCache[station.id];
+      if (isHexColor(manualColor)) return manualColor;
+
+      const inferredColor = stationAccentCache[station.id];
+      if (isHexColor(inferredColor)) return inferredColor;
+
+      const defaultColor = clampAccentColor(station.bgColor);
+      if (defaultColor) return defaultColor;
+
       return hashToColor(station.name);
+    }
+
+    function getStationBgColor(station) {
+      return getStationAccentColor(station);
     }
 
     function isHexColor(value) {
@@ -573,23 +770,46 @@
     }
 
     function applyPlayerTheme(station) {
-      const stationColor = getStationBgColor(station);
+      const stationColor = getStationAccentColor(station);
       const textColor = getContrastColor(stationColor);
       const glassBg = hexToRgba(stationColor || '#181818', 0.95);
       document.documentElement.style.setProperty('--pb-bg', glassBg);
       document.documentElement.style.setProperty('--pb-text', textColor);
     }
 
+    function applyCardTheme(card, station) {
+      const accentColor = getStationAccentColor(station);
+      const mode = getStationDisplayMode(station.id);
+      const textOnAccent = getContrastColor(accentColor);
+
+      const cardBg = mode === 'full' ? accentColor : 'var(--card-surface)';
+      const cardText = mode === 'full' ? textOnAccent : 'var(--text)';
+      const logoPlateBg = mode === 'clean'
+        ? 'var(--logo-plate-neutral)'
+        : mode === 'brand'
+          ? hexToRgba(accentColor, 0.18)
+          : hexToRgba(textOnAccent === '#ffffff' ? '#ffffff' : '#000000', 0.16);
+      const logoPlateBorder = mode === 'clean'
+        ? 'var(--logo-plate-border)'
+        : hexToRgba(accentColor, 0.45);
+
+      card.classList.remove('mode-clean', 'mode-brand', 'mode-full');
+      card.classList.add(`mode-${mode}`);
+      card.style.backgroundColor = cardBg;
+      card.style.color = cardText;
+      card.style.setProperty('--card-logo-plate-bg', logoPlateBg);
+      card.style.setProperty('--card-logo-plate-border', logoPlateBorder);
+      return { accentColor };
+    }
+
     function updateStationCardColor(stationId, color) {
-      stationColorCache[stationId] = color;
+      stationColorCache[stationId] = clampAccentColor(color) || color;
       localStorage.setItem('freq_station_colors', JSON.stringify(stationColorCache));
       const station = getStationById(stationId);
       if (!station) return;
       const card = document.getElementById(`card-${stationId}`);
       if (card) {
-        const textColor = getContrastColor(color);
-        card.style.backgroundColor = color;
-        card.style.color = textColor;
+        applyCardTheme(card, station);
       }
       if (activeStation && activeStation.id === stationId) {
         applyPlayerTheme(station);
@@ -597,8 +817,22 @@
       }
     }
 
+    function updateStationAccentColor(stationId, color) {
+      const accentColor = clampAccentColor(color) || hashToColor(getStationById(stationId)?.name);
+      stationAccentCache[stationId] = accentColor;
+      localStorage.setItem('freq_station_accents', JSON.stringify(stationAccentCache));
+      const station = getStationById(stationId);
+      if (!station) return;
+      const card = document.getElementById(`card-${stationId}`);
+      if (card && !stationColorCache[stationId]) applyCardTheme(card, station);
+      if (activeStation && activeStation.id === stationId && !stationColorCache[stationId]) {
+        applyPlayerTheme(station);
+        updateGridStyles(stationId);
+      }
+    }
+
     function inferColorFromLogo(station) {
-      if (!station.logo || stationColorCache[station.id]) return;
+      if (!station.logo || stationColorCache[station.id] || stationAccentCache[station.id]) return;
       const img = new Image();
       img.crossOrigin = 'anonymous';
       img.referrerPolicy = 'no-referrer';
@@ -612,23 +846,45 @@
           canvas.height = sampleSize;
           ctx.drawImage(img, 0, 0, sampleSize, sampleSize);
           const data = ctx.getImageData(0, 0, sampleSize, sampleSize).data;
-          let r = 0, g = 0, b = 0, count = 0;
-          for (let i = 0; i < data.length; i += 16) {
+          let weightedHueX = 0;
+          let weightedHueY = 0;
+          let weightedS = 0;
+          let weightedL = 0;
+          let totalWeight = 0;
+          for (let i = 0; i < data.length; i += 4) {
             const alpha = data[i + 3];
-            if (alpha < 128) continue;
-            r += data[i];
-            g += data[i + 1];
-            b += data[i + 2];
-            count++;
+            if (alpha < 160) continue;
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            if (max > 240 && min > 230) continue;
+            if (max < 28 && min < 20) continue;
+            const hsl = rgbToHsl(r, g, b);
+            if (hsl.s < 12) continue;
+            const weight = (hsl.s / 100) * (alpha / 255);
+            const hueRadians = hsl.h * Math.PI / 180;
+            weightedHueX += Math.cos(hueRadians) * weight;
+            weightedHueY += Math.sin(hueRadians) * weight;
+            weightedS += hsl.s * weight;
+            weightedL += hsl.l * weight;
+            totalWeight += weight;
           }
-          if (!count) return;
-          const color = rgbToHex(Math.round(r / count), Math.round(g / count), Math.round(b / count));
-          updateStationCardColor(station.id, color);
+          if (totalWeight <= 0) {
+            updateStationAccentColor(station.id, hashToColor(station.name));
+            return;
+          }
+          const hue = (Math.atan2(weightedHueY, weightedHueX) * 180 / Math.PI + 360) % 360;
+          const sat = clamp(weightedS / totalWeight, 45, 78);
+          const light = clamp(weightedL / totalWeight, 34, 62);
+          const color = hslToHex(hue, sat, light);
+          updateStationAccentColor(station.id, color);
         } catch (err) {
-          updateStationCardColor(station.id, hashToColor(station.name));
+          updateStationAccentColor(station.id, hashToColor(station.name));
         }
       };
-      img.onerror = () => updateStationCardColor(station.id, hashToColor(station.name));
+      img.onerror = () => updateStationAccentColor(station.id, hashToColor(station.name));
       img.src = station.logo;
     }
 
@@ -661,6 +917,37 @@
       });
     }
 
+    function updateFavoritesFilterButton() {
+      const btn = document.getElementById('favorites-filter-btn');
+      if (!btn) return;
+      btn.classList.toggle('active', showFavoritesOnly);
+      btn.title = showFavoritesOnly ? 'Showing only favorites' : 'Show only favorites';
+    }
+
+    function toggleFavoritesOnly() {
+      showFavoritesOnly = !showFavoritesOnly;
+      localStorage.setItem('freq_show_favorites_only', String(showFavoritesOnly));
+      updateFavoritesFilterButton();
+      initGrid();
+    }
+
+    function getModeLabel(mode) {
+      if (mode === 'clean') return 'Clean';
+      if (mode === 'full') return 'Full';
+      return 'Brand';
+    }
+
+    function cycleDisplayMode(e, stationId) {
+      e.stopPropagation();
+      const modes = ['clean', 'brand', 'full'];
+      const currentIndex = modes.indexOf(getStationDisplayMode(stationId));
+      const nextMode = modes[(currentIndex + 1) % modes.length];
+      stationDisplayModes[stationId] = nextMode;
+      localStorage.setItem('freq_station_display_modes', JSON.stringify(stationDisplayModes));
+      initGrid();
+      if (activeStation && activeStation.id) updateGridStyles(activeStation.id);
+    }
+
     function handleSearchInput(value) {
       currentSearchTerm = value.trim().toLowerCase();
       initGrid();
@@ -678,12 +965,13 @@
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
       const sortedStations = getSortedStations().filter(station =>
-        !currentSearchTerm || station.name.toLowerCase().includes(currentSearchTerm)
+        (!currentSearchTerm || station.name.toLowerCase().includes(currentSearchTerm)) &&
+        (!showFavoritesOnly || favorites.includes(station.id))
       );
 
       sortedStations.forEach((station, index) => {
-        const stationColor = getStationBgColor(station);
-        const textColor = getContrastColor(stationColor);
+        const mode = getStationDisplayMode(station.id);
+        const modeLabel = getModeLabel(mode);
         const isFav = favorites.includes(station.id);
         const isCustom = station.id.startsWith('custom_');
         
@@ -693,14 +981,11 @@
         card.tabIndex = 0; 
         
         card.style.animationDelay = `${index * 0.05}s`;
-        
-        // Retains the exact logo background color regardless of Light/Dark theme!
-        card.style.backgroundColor = stationColor || 'var(--modal-bg)';
-        card.style.color = textColor;
+        const { accentColor } = applyCardTheme(card, station);
 
         if (activeStation && activeStation.id === station.id) {
           card.classList.add('playing');
-          const glowColor = stationColor === '#000000' ? '#555555' : stationColor;
+          const glowColor = accentColor === '#000000' ? '#555555' : accentColor;
           card.style.boxShadow = `0 0 0 4px var(--bg), 0 0 0 8px ${glowColor}, 0 15px 30px rgba(0,0,0,0.5)`;
         }
 
@@ -713,14 +998,18 @@
         
         // Show edit button only for custom stations
         const editHtml = isCustom ? `<i class="fa-solid fa-pen edit-btn" onclick="openEditModal(event, '${station.id}')" tabindex="0"></i>` : '';
+        const modeHtml = `<button class="mode-btn" onclick="cycleDisplayMode(event, '${station.id}')" title="Display: ${modeLabel} (click to cycle)" tabindex="0"><i class="fa-solid fa-layer-group"></i></button>`;
 
         const logoHTML = station.logo 
-            ? `<img src="${station.logo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-               <i class="fa-solid fa-radio" style="display:none; font-size: 2rem; margin-bottom: 0.8rem; color: ${textColor}; opacity: 0.5;"></i>`
-            : `<i class="fa-solid fa-radio" style="font-size: 2rem; margin-bottom: 0.8rem; color: ${textColor}; opacity: 0.5;"></i>`;
+            ? `<div class="logo-plate">
+                 <img src="${station.logo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                 <i class="fa-solid fa-radio" style="display:none; font-size: 1.5rem; opacity: 0.5;"></i>
+               </div>`
+            : `<div class="logo-plate"><i class="fa-solid fa-radio" style="font-size: 1.5rem; opacity: 0.5;"></i></div>`;
 
         card.innerHTML = `
           ${editHtml}
+          ${modeHtml}
           <i class="${heartClass} fa-heart favorite-btn" 
              onclick="toggleFavorite(event, '${station.id}')" tabindex="0"></i>
           ${logoHTML}
@@ -758,10 +1047,11 @@
       sortedStations.forEach(station => {
         const card = document.getElementById(`card-${station.id}`);
         if (!card) return;
+        const { accentColor } = applyCardTheme(card, station);
 
         if (station.id === activeStationId) {
           card.classList.add('playing');
-          const glowColor = station.bgColor === '#000000' ? '#555555' : station.bgColor;
+          const glowColor = accentColor === '#000000' ? '#555555' : accentColor;
           card.style.boxShadow = `0 0 0 4px var(--bg), 0 0 0 8px ${glowColor}, 0 15px 30px rgba(0,0,0,0.5)`;
         } else {
           card.classList.remove('playing');
@@ -804,6 +1094,7 @@
           navigator.mediaSession.setActionHandler('pause', () => audio.pause());
         }
       }
+      updateCopyButtonState();
       updateGridStyles(station.id);
     }
 
@@ -821,8 +1112,13 @@
     });
 
     function updateVolume(val) {
-      audio.volume = val;
-      if (val > 0) audio.muted = false;
+      const volumeValue = Number(val);
+      audio.volume = volumeValue;
+      if (volumeValue > 0) audio.muted = false;
+      if (volumeValue > 0) prevVolume = volumeValue;
+      localStorage.setItem('freq_volume', String(audio.volume));
+      localStorage.setItem('freq_muted', String(audio.muted));
+      localStorage.setItem('freq_volume_prev', String(prevVolume));
       updateVolumeIcon();
     }
 
@@ -837,6 +1133,9 @@
         audio.muted = true;
         slider.value = 0;
       }
+      localStorage.setItem('freq_volume', String(audio.volume));
+      localStorage.setItem('freq_muted', String(audio.muted));
+      localStorage.setItem('freq_volume_prev', String(prevVolume));
       updateVolumeIcon();
     }
 
@@ -845,6 +1144,29 @@
       if (audio.muted || audio.volume === 0) icon.className = 'fa-solid fa-volume-xmark volume-icon';
       else if (audio.volume < 0.5) icon.className = 'fa-solid fa-volume-low volume-icon';
       else icon.className = 'fa-solid fa-volume-high volume-icon';
+    }
+
+    function updateCopyButtonState() {
+      const copyBtn = document.getElementById('copy-url-btn');
+      if (!copyBtn) return;
+      const hasStation = Boolean(activeStation && activeStation.streamUrl);
+      copyBtn.disabled = !hasStation;
+      copyBtn.title = hasStation ? `Copy stream URL for ${activeStation.name}` : 'Select a station to copy stream URL';
+    }
+
+    async function copyCurrentStreamUrl() {
+      if (!activeStation || !activeStation.streamUrl) return;
+      try {
+        await navigator.clipboard.writeText(activeStation.streamUrl);
+        const status = document.getElementById('pb-status');
+        const previous = status.innerText;
+        status.innerText = 'Stream URL copied';
+        setTimeout(() => {
+          if (status.innerText === 'Stream URL copied') status.innerText = previous;
+        }, 1300);
+      } catch (err) {
+        alert('Could not copy stream URL.');
+      }
     }
 
     function cycleTimer() {
@@ -909,6 +1231,7 @@
         document.getElementById('cs-logo').value = '';
         document.getElementById('cs-auto-color').checked = true;
         document.getElementById('cs-bgcolor').value = defaultCustomColor;
+        document.getElementById('cs-display-mode').value = 'brand';
 
         handleAutoColorToggle();
         updateModalPreview();
@@ -932,6 +1255,7 @@
         const cachedColor = stationColorCache[id];
         document.getElementById('cs-auto-color').checked = !cachedColor;
         document.getElementById('cs-bgcolor').value = isHexColor(cachedColor) ? cachedColor : defaultCustomColor;
+        document.getElementById('cs-display-mode').value = getStationDisplayMode(id);
 
         handleAutoColorToggle();
         updateModalPreview();
@@ -955,16 +1279,29 @@
         const logo = document.getElementById('cs-logo').value.trim();
         const isAuto = document.getElementById('cs-auto-color').checked;
         const manualColor = document.getElementById('cs-bgcolor').value || defaultCustomColor;
-        const previewColor = isAuto ? hashToColor(name) : manualColor;
-        const previewTextColor = safePreviewTextColor(previewColor);
+        const previewMode = document.getElementById('cs-display-mode').value;
+        const accentColor = isAuto ? hashToColor(name) : (clampAccentColor(manualColor) || manualColor);
+        const previewColor = previewMode === 'full' ? accentColor : 'var(--card-surface)';
+        const previewTextColor = previewMode === 'full' ? safePreviewTextColor(accentColor) : 'var(--text)';
+        const previewPlateBg = previewMode === 'clean'
+          ? 'var(--logo-plate-neutral)'
+          : previewMode === 'brand'
+            ? hexToRgba(accentColor, 0.18)
+            : hexToRgba(previewTextColor === '#ffffff' ? '#ffffff' : '#000000', 0.16);
+        const previewPlateBorder = previewMode === 'clean'
+          ? 'var(--logo-plate-border)'
+          : hexToRgba(accentColor, 0.45);
 
         const previewCard = document.getElementById('cs-preview-card');
         const previewName = document.getElementById('cs-preview-name');
         const previewLogo = document.getElementById('cs-preview-logo');
         const previewIcon = document.getElementById('cs-preview-icon');
+        const previewPlate = document.getElementById('cs-preview-plate');
 
         previewCard.style.backgroundColor = previewColor;
         previewCard.style.color = previewTextColor;
+        previewPlate.style.backgroundColor = previewPlateBg;
+        previewPlate.style.borderColor = previewPlateBorder;
         previewName.innerText = name;
 
         if (logo) {
@@ -983,6 +1320,7 @@
         const logo = document.getElementById('cs-logo').value.trim();
         const useAutoColor = document.getElementById('cs-auto-color').checked;
         const chosenColor = document.getElementById('cs-bgcolor').value || defaultCustomColor;
+        const displayMode = document.getElementById('cs-display-mode').value;
 
         if(!name || !url) return alert('Station Name and Stream URL are required!');
 
@@ -993,8 +1331,12 @@
                 customStations[index].name = name;
                 customStations[index].streamUrl = url;
                 customStations[index].logo = logo || null;
-                if (useAutoColor) delete stationColorCache[editingStationId];
+                if (useAutoColor) {
+                  delete stationColorCache[editingStationId];
+                  delete stationAccentCache[editingStationId];
+                }
                 else stationColorCache[editingStationId] = chosenColor;
+                stationDisplayModes[editingStationId] = displayMode;
                 
                 // Live update player if we are currently listening to it
                 if (activeStation && activeStation.id === editingStationId) {
@@ -1010,12 +1352,18 @@
                 logo: logo || null
             };
             customStations.push(newStation);
-            if (useAutoColor) delete stationColorCache[newStation.id];
+            if (useAutoColor) {
+              delete stationColorCache[newStation.id];
+              delete stationAccentCache[newStation.id];
+            }
             else stationColorCache[newStation.id] = chosenColor;
+            stationDisplayModes[newStation.id] = displayMode;
         }
 
         localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
         localStorage.setItem('freq_station_colors', JSON.stringify(stationColorCache));
+        localStorage.setItem('freq_station_accents', JSON.stringify(stationAccentCache));
+        localStorage.setItem('freq_station_display_modes', JSON.stringify(stationDisplayModes));
         closeAddModal();
         initGrid(); 
     }
@@ -1027,7 +1375,11 @@
             customStations = customStations.filter(s => s.id !== editingStationId);
             localStorage.setItem('freq_custom_stations', JSON.stringify(customStations));
             delete stationColorCache[editingStationId];
+            delete stationAccentCache[editingStationId];
+            delete stationDisplayModes[editingStationId];
             localStorage.setItem('freq_station_colors', JSON.stringify(stationColorCache));
+            localStorage.setItem('freq_station_accents', JSON.stringify(stationAccentCache));
+            localStorage.setItem('freq_station_display_modes', JSON.stringify(stationDisplayModes));
             
             // Clean up favorites
             favorites = favorites.filter(id => id !== editingStationId);
@@ -1040,6 +1392,7 @@
                 audio.pause();
                 document.getElementById('player-bar').classList.remove('active');
                 activeStation = null;
+                updateCopyButtonState();
             }
 
             closeAddModal();
